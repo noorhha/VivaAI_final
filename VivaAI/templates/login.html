@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VivaAI - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/login.css"/>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16Z"/>
+        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16Z"/>
+      </svg>
+    </div>
+    <span class="brand-name">VivaAI</span>
+  </div>
+  <p class="left-desc">
+    AI-powered oral examination platform that ensures fair, consistent, and insightful assessments through multimodal analysis.
+  </p>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="form-container">
+
+    <div class="welcome">
+      <h1 id="welcomeTitle">Welcome back</h1>
+      <p>Select your role to continue</p>
+    </div>
+
+    <!-- Role cards -->
+    <div class="role-cards">
+      <div class="role-card" id="cardStudent" onclick="selectRole('student', this)">
+        <div class="role-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div class="role-title">Student</div>
+      </div>
+
+      <div class="role-card" id="cardInstructor" onclick="selectRole('instructor', this)">
+        <div class="role-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
+        <div class="role-title">Instructor</div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="error-msg"   id="errorMsg"   style="display:none;color:#EF4444;font-size:13px;margin-bottom:8px;"></div>
+    <div class="success-msg" id="successMsg" style="display:none;color:#10B981;font-size:13px;margin-bottom:8px;"></div>
+
+    <!-- SIGN IN fields (hidden until role selected) -->
+    <div id="signinFields" style="display:none;">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signinEmail" placeholder="you@students.adu.ac.ae"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signinPass" placeholder="••••••••"/>
+      </div>
+    </div>
+
+    <!-- SIGN UP fields (hidden by default) -->
+    <div id="signupFields" style="display:none;">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder=""/>
+      </div>
+      <div class="form-group">
+        <label>Student ID</label>
+        <input type="text" id="signupId" placeholder=""/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@students.adu.ac.ae"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signupPass" placeholder="Create a password (min 6 chars)"/>
+      </div>
+    </div>
+
+    <!-- Submit button -->
+    <button class="btn-submit" id="submitBtn" onclick="handleAction()" style="display:none;">
+      <span id="btnText">Sign In</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </button>
+
+    <!-- Toggle sign in / sign up -->
+    <div class="toggle-line" id="toggleLine" style="display:none;">
+      Don't have an account? <a style="cursor:pointer;color:#1a3a7c;" onclick="switchMode('signup')">Sign Up</a>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import {
+    signIn,
+    registerStudent,
+    getCurrentUser
+  } from "/static/js/firebase.js";
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentRole = null;
+  let currentMode = "signin";
+
+  // ── If already logged in redirect ──────────────────────────────────────────
+  getCurrentUser().then(user => {
+    if (user) {
+      window.location.href = user.role === "instructor" ? "/instructor" : "/student";
+    }
+  });
+
+  // ── Role selection ─────────────────────────────────────────────────────────
+  window.selectRole = function(role, el) {
+    currentRole = role;
+    currentMode = "signin"; // always reset to signin when picking role
+
+    document.querySelectorAll(".role-card").forEach(c => c.classList.remove("active"));
+    el.classList.add("active");
+
+    // Show signin fields + button
+    document.getElementById("signinFields").style.display = "block";
+    document.getElementById("signupFields").style.display = "none";
+    document.getElementById("submitBtn").style.display    = "flex";
+    document.getElementById("btnText").textContent        = "Sign In";
+    document.getElementById("welcomeTitle").textContent   = role === "instructor" ? "Instructor Login" : "Student Login";
+
+    // Instructors can't self-signup
+    if (role === "instructor") {
+      document.getElementById("toggleLine").style.display = "none";
+    } else {
+      document.getElementById("toggleLine").style.display = "block";
+      document.getElementById("toggleLine").innerHTML =
+        `Don't have an account? <a style="cursor:pointer;color:#1a3a7c;" onclick="switchMode('signup')">Sign Up</a>`;
+    }
+
+    clearMessages();
+  };
+
+  // ── Switch signin / signup ─────────────────────────────────────────────────
+  window.switchMode = function(mode) {
+    currentMode = mode;
+    const isSignup = mode === "signup";
+
+    document.getElementById("signinFields").style.display = isSignup ? "none" : "block";
+    document.getElementById("signupFields").style.display = isSignup ? "block" : "none";
+    document.getElementById("btnText").textContent        = isSignup ? "Sign Up" : "Sign In";
+    document.getElementById("welcomeTitle").textContent   = isSignup ? "Create Account" : "Student Login";
+
+    document.getElementById("toggleLine").innerHTML = isSignup
+      ? `Already have an account? <a style="cursor:pointer;color:#1a3a7c;" onclick="switchMode('signin')">Sign In</a>`
+      : `Don't have an account? <a style="cursor:pointer;color:#1a3a7c;" onclick="switchMode('signup')">Sign Up</a>`;
+
+    clearMessages();
+  };
+
+  // ── Handle submit ──────────────────────────────────────────────────────────
+  window.handleAction = async function() {
+    clearMessages();
+
+    if (!currentRole) {
+      showError("Please select a role first.");
+      return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    document.getElementById("btnText").textContent = "Please wait...";
+
+    try {
+      if (currentMode === "signin") {
+        const email    = document.getElementById("signinEmail").value.trim();
+        const password = document.getElementById("signinPass").value;
+
+        if (!email || !password) throw new Error("Please fill in all fields.");
+
+        const user = await signIn(email, password);
+
+        if (user.role !== currentRole) {
+          throw new Error(`This account is registered as a ${user.role}, not a ${currentRole}.`);
+        }
+
+        showSuccess("Signed in! Redirecting...");
+        setTimeout(() => {
+          window.location.href = user.role === "instructor" ? "/instructor" : "/student";
+        }, 800);
+
+      } else {
+        const name      = document.getElementById("signupName").value.trim();
+        const studentId = document.getElementById("signupId").value.trim();
+        const email     = document.getElementById("signupEmail").value.trim();
+        const password  = document.getElementById("signupPass").value;
+
+        if (!name || !studentId || !email || !password)
+          throw new Error("Please fill in all fields.");
+        if (password.length < 6)
+          throw new Error("Password must be at least 6 characters.");
+
+        await registerStudent(name, studentId, email, password);
+        showSuccess("Account created! Redirecting...");
+        setTimeout(() => { window.location.href = "/student"; }, 800);
+      }
+
+    } catch (err) {
+      let msg = err.message;
+      if (msg.includes("user-not-found") || msg.includes("wrong-password") || msg.includes("invalid-credential"))
+        msg = "Invalid email or password.";
+      else if (msg.includes("email-already-in-use"))
+        msg = "An account with this email already exists.";
+      else if (msg.includes("invalid-email"))
+        msg = "Please enter a valid email address.";
+      showError(msg);
+    } finally {
+      btn.disabled = false;
+      document.getElementById("btnText").textContent = currentMode === "signup" ? "Sign Up" : "Sign In";
+    }
+  };
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function showError(msg) {
+    const el = document.getElementById("errorMsg");
+    el.textContent   = msg;
+    el.style.display = "block";
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById("successMsg");
+    el.textContent   = msg;
+    el.style.display = "block";
+  }
+  function clearMessages() {
+    document.getElementById("errorMsg").style.display   = "none";
+    document.getElementById("successMsg").style.display = "none";
+  }
+</script>
+
+</body>
+</html>

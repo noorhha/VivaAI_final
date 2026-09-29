@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VivaAI - Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #F3F4F6; color: #111827; min-height: 100vh; }
+
+    /* NAV */
+    .navbar { display:flex; align-items:center; justify-content:space-between; padding:0 32px; height:56px; background:#fff; border-bottom:1px solid #E5E7EB; position:sticky; top:0; z-index:100; }
+    .nav-brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:17px; color:#111827; }
+    .nav-brand svg { color:#1a3a7c; }
+    .nav-badge { background:#EF4444; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; letter-spacing:.5px; }
+    .nav-right { display:flex; align-items:center; gap:12px; }
+    .nav-name { font-size:14px; font-weight:500; color:#374151; }
+    .btn-logout { background:none; border:1px solid #E5E7EB; padding:6px 14px; border-radius:8px; font-size:13px; cursor:pointer; color:#374151; }
+    .btn-logout:hover { background:#F3F4F6; }
+
+    /* LAYOUT */
+    .layout { display:flex; min-height:calc(100vh - 56px); }
+    .sidebar { width:220px; background:#fff; border-right:1px solid #E5E7EB; padding:24px 0; flex-shrink:0; }
+    .sidebar-label { font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; padding:0 20px 8px; }
+    .nav-item { display:flex; align-items:center; gap:10px; width:100%; padding:10px 20px; background:none; border:none; font-size:14px; font-weight:500; color:#6B7280; cursor:pointer; text-align:left; border-radius:0; transition:.15s; }
+    .nav-item:hover { background:#F9FAFB; color:#111827; }
+    .nav-item.active { background:#e8eef8; color:#1a3a7c; }
+    .main { flex:1; padding:32px; max-width:1100px; }
+
+    /* PAGE SECTIONS */
+    .page-section { display:none; }
+    .page-section.active { display:block; }
+
+    /* PAGE HEADER */
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .page-title { font-size:22px; font-weight:700; color:#111827; }
+    .page-sub { font-size:14px; color:#6B7280; margin-top:2px; }
+
+    /* STATS */
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
+    .stat-card { background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:20px 24px; }
+    .stat-label { font-size:13px; color:#6B7280; font-weight:500; margin-bottom:6px; }
+    .stat-value { font-size:28px; font-weight:700; color:#111827; }
+    .stat-tag { font-size:11px; color:#1a3a7c; font-weight:500; margin-top:4px; }
+
+    /* CARD */
+    .card { background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:24px; margin-bottom:20px; }
+    .card-title { font-size:15px; font-weight:600; color:#111827; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .card-sub { font-size:13px; color:#9CA3AF; margin-bottom:16px; }
+
+    /* TABLE */
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { text-align:left; font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.5px; text-transform:uppercase; padding:10px 12px; border-bottom:1px solid #F3F4F6; }
+    td { padding:12px; border-bottom:1px solid #F9FAFB; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#FAFAFA; }
+
+    /* BUTTONS */
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:9px; font-size:14px; font-weight:500; cursor:pointer; border:none; transition:.15s; }
+    .btn-primary { background:#1a3a7c; color:#fff; }
+    .btn-primary:hover { background:#0f2d6a; }
+    .btn-secondary { background:#fff; color:#374151; border:1px solid #E5E7EB; }
+    .btn-secondary:hover { background:#F9FAFB; }
+    .btn-danger { background:#FEF2F2; color:#EF4444; border:1px solid #FECACA; }
+    .btn-danger:hover { background:#FEE2E2; }
+    .btn-sm { padding:5px 12px; font-size:12px; }
+
+    /* PILLS */
+    .pill { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
+    .pill-blue   { background:#EFF6FF; color:#3B82F6; }
+    .pill-green  { background:#F0FDF4; color:#16A34A; }
+    .pill-purple { background:#e8eef8; color:#1a3a7c; }
+    .pill-red    { background:#FEF2F2; color:#EF4444; }
+    .pill-gray   { background:#F3F4F6; color:#6B7280; }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:16px; padding:28px; width:440px; max-width:95vw; }
+    .modal-title { font-size:16px; font-weight:700; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+    .modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:#9CA3AF; }
+    .modal-close:hover { color:#374151; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:500; color:#374151; margin-bottom:5px; }
+    .form-group input, .form-group select { width:100%; padding:9px 12px; border:1px solid #E5E7EB; border-radius:9px; font-size:14px; outline:none; font-family:inherit; }
+    .form-group input:focus, .form-group select:focus { border-color:#1a3a7c; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+    .error-msg { color:#EF4444; font-size:13px; margin-bottom:10px; display:none; }
+    .success-msg { color:#16A34A; font-size:13px; margin-bottom:10px; display:none; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:24px; right:24px; background:#111827; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:500; z-index:999; opacity:0; transition:.3s; pointer-events:none; }
+    .toast.show { opacity:1; }
+    .toast.warn  { background:#F59E0B; }
+    .toast.error { background:#EF4444; }
+
+    /* TABS */
+    .tab-bar { display:flex; gap:4px; background:#F3F4F6; border-radius:10px; padding:4px; margin-bottom:20px; width:fit-content; }
+    .tab-btn { padding:7px 18px; border-radius:8px; border:none; background:none; font-size:13px; font-weight:500; color:#6B7280; cursor:pointer; transition:.15s; }
+    .tab-btn.active { background:#fff; color:#111827; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+
+    /* SEARCH */
+    .search-bar { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+    .search-bar input { flex:1; padding:8px 14px; border:1px solid #E5E7EB; border-radius:9px; font-size:14px; outline:none; font-family:inherit; }
+    .search-bar input:focus { border-color:#1a3a7c; }
+  </style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN SCREEN -->
+<div id="loginScreen" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:#F3F4F6;">
+  <div style="background:#fff;border-radius:16px;padding:40px;width:380px;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a3a7c" stroke-width="1.8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16Z"/></svg>
+      <div>
+        <div style="font-weight:700;font-size:18px;color:#111827;">VivaAI</div>
+        <div style="font-size:12px;color:#9CA3AF;letter-spacing:.5px;">ADMIN PANEL</div>
+      </div>
+    </div>
+    <div style="font-size:15px;font-weight:600;color:#111827;margin-bottom:4px;">Admin Sign In</div>
+    <div style="font-size:13px;color:#9CA3AF;margin-bottom:24px;">Enter your admin credentials to continue</div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:5px;">Email</label>
+      <input id="adminEmail" type="email" placeholder="admin@vivaai.com" autocomplete="off"
+        style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:9px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;"/>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:5px;">Password</label>
+      <input id="adminPass" type="password" placeholder="••••••••"
+        style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:9px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;"/>
+    </div>
+    <div id="loginError" style="display:none;color:#EF4444;font-size:13px;margin-bottom:12px;"></div>
+    <button id="loginBtn" style="width:100%;padding:11px;background:#1a3a7c;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;">
+      Sign In →
+    </button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD (hidden until logged in) -->
+<div id="adminApp" style="display:none;">
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16Z"/></svg>
+    VivaAI
+    <span class="nav-badge">ADMIN</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-name" id="navName">Admin</span>
+    <button class="btn-logout" id="logoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-label">Admin</div>
+    <button class="nav-item active" id="nav-overview" onclick="showPage('overview',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="nav-item" id="nav-instructors" onclick="showPage('instructors',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Instructors
+    </button>
+    <button class="nav-item" id="nav-students" onclick="showPage('students',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Students
+    </button>
+    <button class="nav-item" id="nav-courses" onclick="showPage('courses',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Courses
+    </button>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="page-section active" id="page-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">System Overview</div>
+          <div class="page-sub">All accounts and activity across VivaAI</div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Instructors</div>
+          <div class="stat-value" id="stat-instructors">—</div>
+          <div class="stat-tag">Active accounts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Students</div>
+          <div class="stat-value" id="stat-students">—</div>
+          <div class="stat-tag">Registered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Courses</div>
+          <div class="stat-value" id="stat-courses">—</div>
+          <div class="stat-tag">Total created</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Instructors</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+            <tbody id="overview-instructors-body"><tr><td colspan="3" style="color:#9CA3AF;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUCTORS -->
+    <div class="page-section" id="page-instructors">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Instructors</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modalAddInstructor')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Instructor
+        </button>
+      </div>
+      <div class="card">
+        <div class="search-bar">
+          <input type="text" id="instructorSearch" placeholder="Search by name or email..." oninput="filterTable('instructors-body', this.value)"/>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Action</th></tr></thead>
+            <tbody id="instructors-body"><tr><td colspan="3" style="color:#9CA3AF;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div class="page-section" id="page-students">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Students</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modalAddStudent')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Student
+        </button>
+      </div>
+      <div class="card">
+        <div class="search-bar">
+          <input type="text" id="studentSearch" placeholder="Search by name, ID, or email..." oninput="filterTable('students-body', this.value)"/>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Student ID</th><th>Email</th><th>Action</th></tr></thead>
+            <tbody id="students-body"><tr><td colspan="4" style="color:#9CA3AF;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- COURSES -->
+    <div class="page-section" id="page-courses">
+      <div class="page-header">
+        <div>
+          <div class="page-title">All Courses</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Course Code</th><th>Course Name</th><th>Instructor</th></tr></thead>
+            <tbody id="courses-body"><tr><td colspan="3" style="color:#9CA3AF;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: Add Instructor -->
+<div class="modal-overlay" id="modalAddInstructor">
+  <div class="modal">
+    <div class="modal-title">Add Instructor <button class="modal-close" onclick="closeModal('modalAddInstructor')">×</button></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="newInstrName" placeholder="" autocomplete="off"/></div>
+    <div class="form-group"><label>Email</label><input type="email" id="newInstrEmail" placeholder="" autocomplete="off"/></div>
+    <div class="form-group"><label>Password</label><input type="password" id="newInstrPass" placeholder=""/></div>
+    <div class="error-msg" id="instrError"></div>
+    <div class="success-msg" id="instrSuccess"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAddInstructor')">Cancel</button>
+      <button class="btn btn-primary" onclick="createInstructor()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Student -->
+<div class="modal-overlay" id="modalAddStudent">
+  <div class="modal">
+    <div class="modal-title">Add Student <button class="modal-close" onclick="closeModal('modalAddStudent')">×</button></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="newStudName" placeholder="" autocomplete="off"/></div>
+    <div class="form-group"><label>Student ID</label><input type="text" id="newStudId" placeholder="" autocomplete="off"/></div>
+    <div class="form-group"><label>Email</label><input type="email" id="newStudEmail" placeholder="" autocomplete="off"/></div>
+    <div class="form-group"><label>Password</label><input type="password" id="newStudPass" placeholder=""/></div>
+    <div class="error-msg" id="studError"></div>
+    <div class="success-msg" id="studSuccess"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalAddStudent')">Cancel</button>
+      <button class="btn btn-primary" onclick="createStudent()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirm Delete -->
+<div class="modal-overlay" id="modalConfirmDelete">
+  <div class="modal">
+    <div class="modal-title">Delete Account <button class="modal-close" onclick="closeModal('modalConfirmDelete')">×</button></div>
+    <p style="font-size:14px;color:#374151;margin-bottom:20px;">Are you sure you want to delete <b id="deleteUserName"></b>? This cannot be undone.</p>
+    <div class="error-msg" id="deleteError"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalConfirmDelete')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- end adminApp -->
+
+<script type="module">
+  import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword }
+                                    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc }
+                                    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBH4PDuzlqtg0kq-zBZID18p9-v0BoqKfM",
+    authDomain:        "vivaai-9fe60.firebaseapp.com",
+    projectId:         "vivaai-9fe60",
+    storageBucket:     "vivaai-9fe60.firebasestorage.app",
+    messagingSenderId: "593955807088",
+    appId:             "1:593955807088:web:b25228dde849dc42d179b5"
+  };
+
+  const fbApp = initializeApp(firebaseConfig, "admin-app");
+  const auth  = getAuth(fbApp);
+  const db    = getFirestore(fbApp);
+
+  // Auth guard: only admin role allowed
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      showLoginScreen();
+      return;
+    }
+
+    const uSnap = await getDoc(doc(db, 'users', user.uid));
+    const role  = uSnap.exists() ? uSnap.data().role : null;
+    if (role !== 'admin') {
+      document.getElementById('loginError').textContent = 'Access denied. This account is not an admin.';
+      document.getElementById('loginError').style.display = 'block';
+      await signOut(auth);
+      showLoginScreen();
+      return;
+    }
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display    = 'block';
+    document.getElementById('navName').textContent = uSnap.data().name || user.email;
+    loadAll();
+  });
+
+  function showLoginScreen() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminApp').style.display    = 'none';
+  }
+
+  document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+  document.getElementById('loginBtn').onclick = async () => {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass  = document.getElementById('adminPass').value;
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    if (!email || !pass) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      errEl.textContent = 'Invalid email or password.';
+      errEl.style.display = 'block';
+    }
+  };
+
+  document.getElementById('adminPass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  // ── Load all data ─────────────────────────────────────────────────────────
+  let allUsers   = [];
+  let allCourses = [];
+
+  async function loadAll() {
+    try {
+      const [usersRes, coursesRes] = await Promise.all([
+        fetch('/api/admin/users'),
+        fetch('/api/admin/courses'),
+      ]);
+      const usersData   = await usersRes.json();
+      const coursesData = await coursesRes.json();
+
+      allUsers   = usersData.users   || [];
+      allCourses = coursesData.courses || [];
+
+      renderOverview();
+      renderInstructors();
+      renderStudents();
+      renderCourses();
+    } catch(e) {
+      showToast('Failed to load data: ' + e.message, 'error');
+    }
+  }
+
+  // ── Overview ──────────────────────────────────────────────────────────────
+  function renderOverview() {
+    const instructors = allUsers.filter(u => u.role === 'instructor');
+    const students    = allUsers.filter(u => u.role === 'student');
+
+    document.getElementById('stat-instructors').textContent = instructors.length;
+    document.getElementById('stat-students').textContent    = students.length;
+    document.getElementById('stat-courses').textContent     = allCourses.length;
+
+    const tbody = document.getElementById('overview-instructors-body');
+    tbody.innerHTML = '';
+    const recent = instructors.slice(0, 5);
+    if (recent.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:#9CA3AF;">No instructors yet.</td></tr>';
+      return;
+    }
+    recent.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><div style="font-weight:600;">${u.name||'—'}</div></td>
+        <td style="color:#6B7280;">${u.email||'—'}</td>
+        <td><span class="pill pill-purple">Instructor</span></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── Instructors ───────────────────────────────────────────────────────────
+  function renderInstructors() {
+    const tbody = document.getElementById('instructors-body');
+    tbody.innerHTML = '';
+    const instructors = allUsers.filter(u => u.role === 'instructor');
+    if (instructors.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:#9CA3AF;">No instructors yet.</td></tr>';
+      return;
+    }
+    instructors.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.dataset.search = `${u.name||''} ${u.email||''}`.toLowerCase();
+      tr.innerHTML = `
+        <td><div style="font-weight:600;">${u.name||'—'}</div></td>
+        <td style="color:#6B7280;">${u.email||'—'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="promptDelete('${u.uid}','${(u.name||'this user').replace(/'/g,"\\'")}')">Delete</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── Students ──────────────────────────────────────────────────────────────
+  function renderStudents() {
+    const tbody = document.getElementById('students-body');
+    tbody.innerHTML = '';
+    const students = allUsers.filter(u => u.role === 'student');
+    if (students.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:#9CA3AF;">No students yet.</td></tr>';
+      return;
+    }
+    students.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.dataset.search = `${u.name||''} ${u.email||''} ${u.studentId||''}`.toLowerCase();
+      tr.innerHTML = `
+        <td><div style="font-weight:600;">${u.name||'—'}</div></td>
+        <td><span class="pill pill-blue">${u.studentId||'—'}</span></td>
+        <td style="color:#6B7280;">${u.email||'—'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="promptDelete('${u.uid}','${(u.name||'this user').replace(/'/g,"\\'")}')">Delete</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── Courses ───────────────────────────────────────────────────────────────
+  function renderCourses() {
+    const tbody = document.getElementById('courses-body');
+    tbody.innerHTML = '';
+    if (allCourses.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:#9CA3AF;">No courses yet.</td></tr>';
+      return;
+    }
+    allCourses.forEach(c => {
+      const instr   = allUsers.find(u => u.uid === c.instructorId);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="pill pill-gray">${c.code||'—'}</span></td>
+        <td style="font-weight:600;">${c.name||'—'}</td>
+        <td style="color:#6B7280;">${instr ? instr.name : '—'}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── Create instructor ─────────────────────────────────────────────────────
+  window.createInstructor = async function() {
+    const name  = document.getElementById('newInstrName').value.trim();
+    const email = document.getElementById('newInstrEmail').value.trim();
+    const pass  = document.getElementById('newInstrPass').value.trim();
+    const errEl = document.getElementById('instrError');
+    const okEl  = document.getElementById('instrSuccess');
+    errEl.style.display = 'none';
+    okEl.style.display  = 'none';
+
+    if (!name || !email || !pass) { errEl.textContent = 'All fields are required.'; errEl.style.display = 'block'; return; }
+    if (pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+
+    try {
+      const res  = await fetch('/api/admin/create_instructor', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pass })
+      });
+      const data = await res.json();
+      if (data.error) { errEl.textContent = data.error; errEl.style.display = 'block'; return; }
+      okEl.textContent = `✅ Instructor "${name}" created successfully!`;
+      okEl.style.display = 'block';
+      document.getElementById('newInstrName').value = '';
+      document.getElementById('newInstrEmail').value = '';
+      document.getElementById('newInstrPass').value = '';
+      setTimeout(() => { closeModal('modalAddInstructor'); loadAll(); }, 1500);
+    } catch(e) {
+      errEl.textContent = 'Network error: ' + e.message; errEl.style.display = 'block';
+    }
+  };
+
+  // ── Create student ────────────────────────────────────────────────────────
+  window.createStudent = async function() {
+    const name      = document.getElementById('newStudName').value.trim();
+    const studentId = document.getElementById('newStudId').value.trim();
+    const email     = document.getElementById('newStudEmail').value.trim();
+    const pass      = document.getElementById('newStudPass').value.trim();
+    const errEl     = document.getElementById('studError');
+    const okEl      = document.getElementById('studSuccess');
+    errEl.style.display = 'none';
+    okEl.style.display  = 'none';
+
+    if (!name || !email || !pass) { errEl.textContent = 'Name, email and password are required.'; errEl.style.display = 'block'; return; }
+    if (pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+
+    try {
+      const res  = await fetch('/api/admin/create_student', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pass, studentId })
+      });
+      const data = await res.json();
+      if (data.error) { errEl.textContent = data.error; errEl.style.display = 'block'; return; }
+      okEl.textContent = `✅ Student "${name}" created successfully!`;
+      okEl.style.display = 'block';
+      document.getElementById('newStudName').value  = '';
+      document.getElementById('newStudId').value    = '';
+      document.getElementById('newStudEmail').value = '';
+      document.getElementById('newStudPass').value  = '';
+      setTimeout(() => { closeModal('modalAddStudent'); loadAll(); }, 1500);
+    } catch(e) {
+      errEl.textContent = 'Network error: ' + e.message; errEl.style.display = 'block';
+    }
+  };
+
+  // ── Delete user ───────────────────────────────────────────────────────────
+  let _deleteUid = null;
+  window.promptDelete = function(uid, name) {
+    _deleteUid = uid;
+    document.getElementById('deleteUserName').textContent = name;
+    document.getElementById('deleteError').style.display = 'none';
+    openModal('modalConfirmDelete');
+  };
+
+  window.confirmDelete = async function() {
+    if (!_deleteUid) return;
+    const errEl = document.getElementById('deleteError');
+    try {
+      const res  = await fetch('/api/admin/delete_user', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: _deleteUid })
+      });
+      const data = await res.json();
+      if (data.error) { errEl.textContent = data.error; errEl.style.display = 'block'; return; }
+      closeModal('modalConfirmDelete');
+      showToast('Account deleted successfully');
+      loadAll();
+    } catch(e) {
+      errEl.textContent = 'Error: ' + e.message; errEl.style.display = 'block';
+    }
+  };
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  window.showPage = function(page, el) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (el) el.classList.add('active');
+  };
+
+  window.openModal = id => {
+    document.getElementById(id).classList.add('open');
+    // Clear any previous success/error messages
+    ['instrError','instrSuccess','studError','studSuccess','deleteError'].forEach(el => {
+      const e = document.getElementById(el);
+      if (e) { e.style.display = 'none'; e.textContent = ''; }
+    });
+  };
+  window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+  window.filterTable = function(tbodyId, query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(tr => {
+      tr.style.display = (tr.dataset.search || '').includes(q) ? '' : 'none';
+    });
+  };
+
+  let _toastTimer;
+  window.showToast = function(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = 'toast show' + (type ? ' ' + type : '');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  };
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+</script>
+</body>
+</html>

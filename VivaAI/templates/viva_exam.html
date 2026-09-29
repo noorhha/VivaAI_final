@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VivaAI - Viva Exam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/viva_exam.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16Z"/>
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16Z"/>
+    </svg>
+    VivaAI
+  </div>
+  <div class="nav-center">
+    <div class="course-badge" id="courseBadge">Loading exam...</div>
+  </div>
+  <button class="btn-end" onclick="endExam()">End Exam</button>
+</nav>
+
+<div class="avatar-container">
+  <div class="avatar-bg"></div>
+  <div class="avatar-ring r1" id="ring1"></div>
+  <div class="avatar-ring r2" id="ring2"></div>
+  <div class="avatar-ring r3" id="ring3"></div>
+
+  <!-- MALE EXAMINER AVATAR -->
+  <div class="avatar-circle" id="avatarCircle">
+    <svg id="avatarSvg" class="avatar-svg" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        #avatarSvg { width: 260px; height: 325px; }
+
+        #avatarSvg .eyelid-l, #avatarSvg .eyelid-r {
+          animation: av-blink 4.38s ease-in-out infinite;
+        }
+        @keyframes av-blink {
+          0%, 100% { height: 0; }
+          50%       { height: 11px; }
+        }
+
+        #avatarSvg .mouth-open { display: none; }
+        #avatarSvg .mouth-rest { display: block; }
+        #avatarSvg.speaking .mouth-open {
+          display: block;
+          animation: av-talk 0.75s ease-in-out infinite;
+          transform-box: fill-box;
+          transform-origin: center top;
+        }
+        #avatarSvg.speaking .mouth-rest { display: none; }
+        @keyframes av-talk {
+          0%   { transform: scaleY(0.15); }
+          10%  { transform: scaleY(0.9); }
+          25%  { transform: scaleY(0.3); }
+          38%  { transform: scaleY(1); }
+          52%  { transform: scaleY(0.15); }
+          64%  { transform: scaleY(0.65); }
+          75%  { transform: scaleY(0.4); }
+          88%  { transform: scaleY(0.85); }
+          100% { transform: scaleY(0.15); }
+        }
+      </style>
+
+      <!-- Body / suit -->
+      <rect x="36" y="158" width="128" height="105" rx="14" fill="#0d1f3c"/>
+      <path d="M36 172 Q50 165 64 172 L64 263 Q50 260 36 263Z" fill="#0a1628"/>
+      <path d="M164 172 Q150 165 136 172 L136 263 Q150 260 164 263Z" fill="#0a1628"/>
+      <!-- Shirt -->
+      <rect x="86" y="155" width="28" height="50" rx="3" fill="#f0f0f0"/>
+      <!-- Tie -->
+      <polygon points="100,163 94,180 100,218 106,180" fill="#8b1a2a"/>
+      <polygon points="94,163 100,170 106,163 100,158" fill="#6e1522"/>
+      <!-- Lapels -->
+      <polygon points="86,158 58,178 82,200" fill="#152848"/>
+      <polygon points="114,158 142,178 118,200" fill="#152848"/>
+      <!-- Pocket square -->
+      <path d="M50 182 Q56 178 62 182 L60 190 Q56 188 52 190Z" fill="#e8e8e8" opacity="0.7"/>
+      <!-- Neck -->
+      <rect x="88" y="136" width="24" height="26" rx="6" fill="#f0c898"/>
+      <rect x="88" y="148" width="24" height="14" rx="4" fill="#e0b080" opacity="0.5"/>
+      <!-- Head -->
+      <ellipse cx="100" cy="116" rx="40" ry="44" fill="#f5c89a"/>
+      <ellipse cx="80"  cy="124" rx="10" ry="7"  fill="#f0a080" opacity="0.18"/>
+      <ellipse cx="120" cy="124" rx="10" ry="7"  fill="#f0a080" opacity="0.18"/>
+      <!-- Hair -->
+      <ellipse cx="100" cy="78" rx="40" ry="24" fill="#2a1a0c"/>
+      <rect x="60" y="78" width="80" height="20" fill="#2a1a0c"/>
+      <path d="M60 82 Q72 74 88 80 Q76 86 60 88Z" fill="#3a2515"/>
+      <path d="M75 74 Q100 68 118 76" stroke="#4a3020" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+      <rect x="60"  y="88" width="8" height="22" rx="4" fill="#2a1a0c"/>
+      <rect x="132" y="88" width="8" height="22" rx="4" fill="#2a1a0c"/>
+      <!-- Ears -->
+      <ellipse cx="61"  cy="118" rx="7" ry="10" fill="#e8b480"/>
+      <ellipse cx="139" cy="118" rx="7" ry="10" fill="#e8b480"/>
+      <path d="M63 113 Q65 118 63 123" stroke="#d49a60" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <!-- Eyebrows -->
+      <path d="M79 106 Q86 101 93 105"  stroke="#2a1a0c" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+      <path d="M107 105 Q114 101 121 106" stroke="#2a1a0c" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+      <!-- Eye whites -->
+      <ellipse cx="86"  cy="114" rx="6" ry="5.5" fill="white"/>
+      <ellipse cx="114" cy="114" rx="6" ry="5.5" fill="white"/>
+      <!-- Iris -->
+      <ellipse cx="87"  cy="115" rx="3.5" ry="3.8" fill="#3a5080"/>
+      <ellipse cx="115" cy="115" rx="3.5" ry="3.8" fill="#3a5080"/>
+      <!-- Pupil -->
+      <ellipse cx="87"  cy="115" rx="2" ry="2.2" fill="#0d0d0d"/>
+      <ellipse cx="115" cy="115" rx="2" ry="2.2" fill="#0d0d0d"/>
+      <!-- Shine -->
+      <circle cx="88.5"  cy="113.5" r="1.1" fill="white"/>
+      <circle cx="116.5" cy="113.5" r="1.1" fill="white"/>
+      <!-- Eyelids (animate height for blink) -->
+      <rect class="eyelid-l" x="80"  y="109" width="12" height="0" rx="6" fill="#f5c89a"/>
+      <rect class="eyelid-r" x="108" y="109" width="12" height="0" rx="6" fill="#f5c89a"/>
+      <!-- Glasses -->
+      <rect x="78"  y="109" width="19" height="12" rx="3.5" stroke="#2a2a2a" stroke-width="1.8" fill="rgba(180,210,255,0.08)" opacity="0.75"/>
+      <rect x="103" y="109" width="19" height="12" rx="3.5" stroke="#2a2a2a" stroke-width="1.8" fill="rgba(180,210,255,0.08)" opacity="0.75"/>
+      <line x1="97" y1="115" x2="103" y2="115" stroke="#2a2a2a" stroke-width="1.6" opacity="0.75"/>
+      <line x1="62"  y1="114" x2="78"  y2="113" stroke="#2a2a2a" stroke-width="1.5" opacity="0.6"/>
+      <line x1="122" y1="113" x2="138" y2="114" stroke="#2a2a2a" stroke-width="1.5" opacity="0.6"/>
+      <!-- Nose -->
+      <path d="M96 120 Q100 128 104 120" stroke="#d09060" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      <ellipse cx="97"  cy="128" rx="2.5" ry="1.5" fill="#d09060" opacity="0.35"/>
+      <ellipse cx="103" cy="128" rx="2.5" ry="1.5" fill="#d09060" opacity="0.35"/>
+      <!-- Mouth (upper lip always visible) -->
+      <path d="M91 133 Q96 130 100 132 Q104 130 109 133" stroke="#b06040" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+      <!-- Animated open mouth (shown when speaking) -->
+      <ellipse class="mouth-open" cx="100" cy="135" rx="8.5" ry="4" fill="#7a2a1a"/>
+      <!-- Resting smile (hidden when speaking) -->
+      <path class="mouth-rest" d="M91 134 Q100 141 109 134" stroke="#b06040" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <circle cx="91"  cy="134" r="1.2" fill="#b06040" opacity="0.6"/>
+      <circle cx="109" cy="134" r="1.2" fill="#b06040" opacity="0.6"/>
+      <!-- Arms -->
+      <rect x="16"  y="164" width="22" height="72" rx="10" fill="#0d1f3c"/>
+      <rect x="162" y="164" width="22" height="72" rx="10" fill="#0d1f3c"/>
+      <rect x="16"  y="224" width="22" height="8" rx="4" fill="#e8e8e8" opacity="0.6"/>
+      <rect x="162" y="224" width="22" height="8" rx="4" fill="#e8e8e8" opacity="0.6"/>
+      <!-- Hands -->
+      <ellipse cx="27"  cy="240" rx="11" ry="9" fill="#f5c89a"/>
+      <ellipse cx="173" cy="240" rx="11" ry="9" fill="#f5c89a"/>
+    </svg>
+  </div>
+
+  <div class="sound-waves" id="soundWaves">
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+  </div>
+
+  <div class="avatar-label">VivaAI Examiner</div>
+
+  <div class="question-area">
+    <div class="question-bubble">
+      <div class="phase-label avatar-phase" id="phaseLabel">
+        <div class="dot"></div>
+        <span id="phaseText">Avatar is asking...</span>
+      </div>
+      <div class="question-text" id="questionText">Loading your question...</div>
+      <div class="question-footer">
+        <div class="answer-timer">
+          <div class="timer-ring-wrap" id="timerRingWrap">
+            <svg class="timer-ring-svg" width="36" height="36" viewBox="0 0 36 36">
+              <circle class="timer-ring-bg" cx="18" cy="18" r="15"/>
+              <circle class="timer-ring-bar" id="timerRingBar" cx="18" cy="18" r="15"
+                stroke-dasharray="94.2" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-ring-text" id="timerRingText">60</div>
+          </div>
+          <div class="timer-status" id="timerStatus">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="student-cam">
+    <div class="cam-feed" id="camFeed">
+      <video id="studentVideo" autoplay muted playsinline></video>
+      <div class="cam-placeholder" id="camPlaceholder">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <span>Camera off</span>
+      </div>
+    </div>
+    <div class="cam-label">You</div>
+    <div class="rec-indicator" id="recIndicator">
+      <div class="rec-dot"></div>
+      <div class="rec-text">REC</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn btn-mic" id="micBtn" onclick="toggleMic()" title="Mute / Unmute">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </button>
+    <button class="ctrl-btn btn-cam-ctrl" id="camBtn" onclick="toggleCam()" title="Camera on/off">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- SETUP OVERLAY: just loading exam data, before guidelines are shown -->
+<div class="overlay" id="setupOverlay">
+  <div class="overlay-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+  </div>
+  <div class="overlay-title">Loading your exam</div>
+  <div class="overlay-sub">Just a moment...</div>
+</div>
+
+<!-- PERMISSIONS OVERLAY: camera/mic checks, shown AFTER guidelines are confirmed -->
+<div class="overlay hidden" id="permissionsOverlay">
+  <div class="overlay-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+  </div>
+  <div class="overlay-title">Setting up your exam</div>
+  <div class="overlay-sub">Checking your camera and microphone</div>
+  <div class="checklist">
+    <div class="check-item loading" id="check-cam"><div class="check-circle"></div>Checking camera access</div>
+    <div class="check-item" id="check-mic"><div class="check-circle"></div>Checking microphone access</div>
+  </div>
+</div>
+
+<!-- GUIDELINES / CONFIRM OVERLAY: shown after setup checks pass, before the exam actually begins -->
+<div class="overlay hidden" id="guidelinesOverlay">
+  <div class="overlay-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+  </div>
+  <div class="overlay-title">Before you begin</div>
+  <div class="overlay-sub">Please read these guidelines carefully</div>
+  <div class="checklist checklist-wide" style="text-align:left;">
+    <div class="check-item done"><div class="check-circle"></div><span><span id="guidelinesTotalQ">5</span> questions, <span id="guidelinesPerQTime">30</span> seconds to answer each</span></div>
+    <div class="check-item done"><div class="check-circle"></div><span>Find a quiet place with minimal background noise</span></div>
+    <div class="check-item done"><div class="check-circle"></div><span>Make sure you have good lighting</span></div>
+    <div class="check-item done"><div class="check-circle"></div><span>Keep your face clearly visible to the camera</span></div>
+    <div class="check-item done"><div class="check-circle"></div><span>The exam cannot be paused or retaken once started</span></div>
+  </div>
+  <button class="btn-primary" onclick="confirmStartExam()" style="margin-top:20px;">Start Exam</button>
+</div>
+
+
+<!-- ALREADY COMPLETED OVERLAY (fix 2 - no retake) -->
+<div class="overlay hidden" id="completedOverlay">
+  <div class="overlay-icon" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </div>
+  <div class="overlay-title">Exam Already Started</div>
+<div class="overlay-sub">You have already started or completed this exam and cannot re-enter. If you believe this is an error, contact your instructor.</div>
+  <button class="btn-primary" onclick="window.location.href='/student'" style="margin-top:8px;">Back to Portal</button>
+</div>
+
+<!-- DONE OVERLAY -->
+<div class="overlay hidden" id="doneOverlay">
+  <div class="overlay-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="overlay-title">Exam Complete</div>
+  <div class="overlay-sub">Thank you! Your responses are being analyzed. Your instructor will review the results shortly.</div>
+  <button class="btn-primary" onclick="window.location.href='/student'" style="margin-top:8px;">Back to Portal</button>
+</div>
+
+<script>
+  // Global controls accessible from onclick attributes
+  function toggleMic()  { window._toggleMic && window._toggleMic(); }
+  function toggleCam()  { window._toggleCam && window._toggleCam(); }
+  function endExam()    { window._endExam   && window._endExam(); }
+  function confirmStartExam() { window._confirmStartExam && window._confirmStartExam(); }
+</script>
+
+<script type="module">
+import { requireAuth, auth } from "/static/js/firebase.js";
+import {
+  getFirestore, doc, getDoc, updateDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+const db = getFirestore(getApp());
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentUser        = null;
+  let examData           = null;
+  let questions          = [];
+  let currentQ           = 0;
+  let answerTime         = 15;
+  let timerInterval      = null;
+  let stream             = null;
+  let mediaRecorder      = null;
+  let recordedChunks     = [];
+  let perQuestionChunks  = {};   // V2: stores chunks per question index
+  let micMuted           = false;
+  let camOff             = false;
+  let examId             = null;
+  let selectedVoice      = null; // fix 5: consistent voice, used only by the browser-TTS fallback
+  let questionAudio      = null; // current <Audio> element playing the server-TTS question
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  async function init() {
+    currentUser = await requireAuth("student");
+    if (!currentUser) return;
+
+    const params = new URLSearchParams(window.location.search);
+    examId = params.get("id");
+
+    if (!examId) {
+      showToast("No exam found. Redirecting...", "error");
+      window.location.href = "/student";
+      return;
+    }
+
+    // Fix 5: pick voice once at startup so it never changes
+    await loadVoice();
+
+    await setupExam();
+  }
+
+  // ── Fix 5: Pick one consistent voice at startup ────────────────────────────
+  function loadVoice() {
+    return new Promise(resolve => {
+      const pick = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        // Pick first English male voice, or first English, or first available
+        selectedVoice =
+          voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("male") && !v.name.toLowerCase().includes("female")) ||
+          voices.find(v => v.lang.startsWith("en-GB") && !v.name.toLowerCase().includes("female")) ||
+          voices.find(v => v.lang.startsWith("en")) ||
+          voices[0];
+        resolve();
+      };
+      if (window.speechSynthesis.getVoices().length > 0) {
+        pick();
+      } else {
+        window.speechSynthesis.onvoiceschanged = () => { pick(); resolve(); };
+        setTimeout(resolve, 1500); // fallback timeout
+      }
+    });
+  }
+
+  // ── Setup ──────────────────────────────────────────────────────────────────
+  // Step 0: Load exam data first (no camera/mic needed for this), so we
+  // can show guidelines with the real question count/timer before ever
+  // asking for camera or microphone access.
+  async function setupExam() {
+    try {
+      const examSnap = await getDoc(doc(db, "exams", examId));
+      if (!examSnap.exists()) throw new Error("Exam not found. Please go back and try again.");
+
+      examData     = examSnap.data();
+      const status = examData.status;
+
+      // Fix 2: Block retake if already completed. Checked before ever
+      // requesting camera/mic, so a returning student doesn't get a
+      // pointless permission prompt for an exam they can't take.
+      if (status === "completed" || status === "in_progress") {
+        document.getElementById("setupOverlay").classList.add("hidden");
+        document.getElementById("completedOverlay").classList.remove("hidden");
+        return;
+      }
+
+      questions  = examData.questions || [];
+      answerTime = examData.answerTimeSecs || 15;
+
+      if (questions.length === 0) throw new Error("No questions generated yet. Please wait and try again.");
+
+      document.getElementById("courseBadge").textContent =
+        `${examData.courseName || "Viva Exam"}${examData.groupName ? " - " + examData.groupName : ""}`;
+
+      document.getElementById("setupOverlay").classList.add("hidden");
+
+      // Show guidelines FIRST, before requesting camera/mic at all.
+      document.getElementById("guidelinesTotalQ").textContent   = questions.length;
+      document.getElementById("guidelinesPerQTime").textContent = answerTime;
+      document.getElementById("guidelinesOverlay").classList.remove("hidden");
+
+    } catch(err) {
+      document.getElementById("setupOverlay").querySelector(".overlay-title").textContent = "Something went wrong";
+      document.getElementById("setupOverlay").querySelector(".overlay-sub").textContent    = err.message;
+    }
+  }
+
+  // ── Guidelines confirm → NOW request camera/mic, then begin the exam ──────
+  window._confirmStartExam = async function() {
+    document.getElementById("guidelinesOverlay").classList.add("hidden");
+    document.getElementById("permissionsOverlay").classList.remove("hidden");
+
+    // Step 1: Camera + Recording (fix 3)
+    markChecking("check-cam");
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const video = document.getElementById("studentVideo");
+      video.srcObject = stream;
+      video.style.display = "block";
+      document.getElementById("camPlaceholder").style.display = "none";
+      document.getElementById("recIndicator").classList.add("show");
+
+      // Recorder is created here but only started once startAnswerTimer()
+      // runs, so recording begins exactly when the countdown ring appears.
+      mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+
+      markDone("check-cam");
+    } catch(e) {
+      markFail("check-cam", "Camera/mic access denied, please allow access and refresh");
+      return;
+    }
+
+    // Step 2: Mic
+    markChecking("check-mic");
+    await delay(500);
+    markDone("check-mic");
+
+    await delay(400);
+    document.getElementById("permissionsOverlay").classList.add("hidden");
+
+    // Mark exam as started only once camera/mic are confirmed live
+    await updateDoc(doc(db, "exams", examId), {
+      status: "in_progress",
+      startedAt: serverTimestamp()
+    });
+
+    showQuestion(0);
+  };
+
+  // ── Show a question ────────────────────────────────────────────────────────
+  function showQuestion(index) {
+    currentQ = index;
+
+    document.getElementById("questionText").textContent = questions[index];
+    document.getElementById("phaseText").textContent    = `Question ${index+1} of ${questions.length}`;
+    document.getElementById("phaseLabel").className     = "phase-label avatar-phase";
+    document.getElementById("timerStatus").textContent  = "Get ready to answer";
+    document.getElementById("timerRingText").textContent = answerTime;
+    document.getElementById("timerRingWrap").classList.remove("show"); // hidden while the avatar reads the question; shown again in startAnswerTimer
+    document.getElementById("timerRingBar").style.stroke = "#1a3a7c";
+    setTimerOffset(0);
+
+    setSpeaking(true);
+    speakQuestion(questions[index]);
+  }
+
+  // ── TTS via server-side OpenAI voice (falls back to browser TTS if the
+  // API call fails, e.g. no API key configured, network issue, etc.) ────────
+  async function speakQuestion(text) {
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voice: "onyx" }),
+      });
+      if (!res.ok) throw new Error(`TTS request failed: ${res.status}`);
+
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+
+      if (questionAudio) {
+        questionAudio.pause();
+        URL.revokeObjectURL(questionAudio.src);
+      }
+      questionAudio = new Audio(url);
+
+      questionAudio.onended = () => {
+        URL.revokeObjectURL(url);
+        setSpeaking(false);
+        startAnswerTimer();
+      };
+      questionAudio.onerror = () => {
+        // Playback failed after fetch succeeded. Don't strand the student
+        // on a silent question forever.
+        setSpeaking(false);
+        startAnswerTimer();
+      };
+
+      await questionAudio.play();
+    } catch (err) {
+      console.warn("Server TTS failed, falling back to browser voice:", err);
+      speakQuestionBrowserFallback(text);
+    }
+  }
+
+  // ── Fallback: browser speechSynthesis (used only if /api/tts fails) ───────
+  function speakQuestionBrowserFallback(text) {
+    if (!window.speechSynthesis) {
+      // No TTS available at all. Still need to start the answer timer
+      // after a reasonable reading estimate so the exam doesn't hang.
+      const words = text.split(" ").length;
+      setTimeout(() => { setSpeaking(false); startAnswerTimer(); }, Math.max(3000, words * 250));
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utt    = new SpeechSynthesisUtterance(text);
+    utt.rate     = 0.88;
+    utt.pitch    = 0.85;
+    utt.volume   = 1.0;
+    if (selectedVoice) utt.voice = selectedVoice; // always same voice
+    utt.onend = () => { setSpeaking(false); startAnswerTimer(); };
+    utt.onerror = () => { setSpeaking(false); startAnswerTimer(); };
+    window.speechSynthesis.speak(utt);
+  }
+
+  // ── Answer timer ───────────────────────────────────────────────────────────
+  function startAnswerTimer() {
+    if (mediaRecorder && mediaRecorder.state === "inactive") {
+      mediaRecorder.start(1000); // recording now starts exactly when the timer does
+    }
+    document.getElementById("timerStatus").textContent = "Your turn to answer";
+    document.getElementById("phaseText").textContent   = "Your turn to answer";
+    document.getElementById("phaseLabel").className    = "phase-label student-phase";
+    document.getElementById("timerRingWrap").classList.add("show"); // was never shown before, real bug
+
+    let remaining = answerTime;
+    document.getElementById("timerRingText").textContent = remaining;
+
+    timerInterval = setInterval(() => {
+      remaining--;
+      document.getElementById("timerRingText").textContent = remaining;
+      setTimerOffset(1 - remaining / answerTime);
+      document.getElementById("timerRingBar").style.stroke =
+        remaining <= 10 ? "#EF4444" : remaining <= 20 ? "#F59E0B" : "#1a3a7c";
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        nextQuestion();
+      }
+    }, 1000);
+  }
+
+  function setTimerOffset(fraction) {
+    document.getElementById("timerRingBar").style.strokeDashoffset = 94.2 * fraction;
+  }
+
+  // ── Next question ──────────────────────────────────────────────────────────
+  async function nextQuestion() {
+    clearInterval(timerInterval);
+    window.speechSynthesis?.cancel();
+    if (questionAudio) { questionAudio.pause(); questionAudio = null; }
+    document.getElementById("phaseLabel").className = "phase-label avatar-phase";
+
+    // V2: Stop recorder to finalise this question's webm with proper headers
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      await new Promise(resolve => {
+        mediaRecorder.onstop = resolve;
+        mediaRecorder.stop();
+      });
+    }
+
+    // Upload this question's video
+    if (recordedChunks.length > 0) {
+      const chunks = [...recordedChunks];
+      recordedChunks = [];
+      uploadQuestionVideo(currentQ, chunks);
+    }
+
+    if (currentQ + 1 < questions.length) {
+      // Restart recorder fresh for next question, gives it proper EBML header.
+      // Not started yet — startAnswerTimer() starts it once the question
+      // has finished being read aloud.
+      mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      setTimeout(() => showQuestion(currentQ + 1), 1000);
+    } else {
+      finishExam();
+    }
+  }
+
+  // ── V2: Upload one question's video to Flask for feature extraction ─────────
+  async function uploadQuestionVideo(qIndex, chunks) {
+    try {
+      const blob    = new Blob(chunks, { type: "video/webm" });
+      const formData = new FormData();
+      formData.append("video",         blob, `q${qIndex + 1}.webm`);
+      formData.append("examId",        examId);
+      formData.append("questionIndex", qIndex);
+
+      console.log(`Uploading Q${qIndex + 1} video (${(blob.size/1024).toFixed(0)}KB)...`);
+
+      const res = await fetch("/api/video/upload", {
+        method: "POST",
+        body:   formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        console.log(`Q${qIndex + 1} uploaded, processing started`);
+      } else {
+        console.warn(`Q${qIndex + 1} upload failed:`, data.error);
+      }
+    } catch(err) {
+      console.warn(`Could not upload Q${qIndex + 1}:`, err.message);
+    }
+  }
+
+  // ── Finish exam ────────────────────────────────────────────────────────────
+  async function finishExam() {
+    window.speechSynthesis?.cancel();
+    if (questionAudio) { questionAudio.pause(); questionAudio = null; }
+    clearInterval(timerInterval);
+
+    // Stop recording (may already be stopped from nextQuestion)
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      await new Promise(resolve => {
+        mediaRecorder.onstop = resolve;
+        mediaRecorder.stop();
+      });
+    }
+
+    // Upload last question's video if chunks remain
+    if (recordedChunks.length > 0) {
+      const chunks = [...recordedChunks];
+      recordedChunks = [];
+      await uploadQuestionVideo(currentQ, chunks);
+    }
+
+    // Stop camera stream
+    if (stream) stream.getTracks().forEach(t => t.stop());
+
+    // Mark exam completed in Firestore
+    try {
+      await updateDoc(doc(db, "exams", examId), {
+        status:      "completed",
+        completedAt: serverTimestamp(),
+      });
+
+      // V2: Trigger inference pipeline. It will wait for all CSVs
+      fetch("/api/pipeline/run", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          examId,
+          studentId: currentUser.uid,
+        })
+      });
+    } catch(err) {
+      console.error("Error completing exam:", err);
+    }
+
+    document.getElementById("doneOverlay").classList.remove("hidden");
+    // Redirect to student portal after 3 seconds
+    setTimeout(() => {
+      window.location.href = "/student";
+    }, 3000);
+  }
+
+  // ── Avatar speaking animation ──────────────────────────────────────────────
+  function setSpeaking(speaking) {
+    ["ring1","ring2","ring3"].forEach(r => {
+      const el = document.getElementById(r);
+      if (el) {
+        el.style.animationPlayState = speaking ? "running" : "paused";
+        el.style.opacity = speaking ? "" : "0.2";
+      }
+    });
+    document.getElementById("soundWaves").style.opacity = speaking ? "1" : "0";
+
+    // Suit avatar: talking animation is driven entirely by the
+    // .speaking class (see embedded <style> inside #avatarSvg).
+    const svg = document.getElementById("avatarSvg");
+    if (svg) svg.classList.toggle("speaking", speaking);
+  }
+
+  // ── Controls ───────────────────────────────────────────────────────────────
+  window._toggleMic = function() {
+    if (!stream) return;
+    micMuted = !micMuted;
+    stream.getAudioTracks().forEach(t => t.enabled = !micMuted);
+    document.getElementById("micBtn").style.opacity = micMuted ? "0.4" : "1";
+  };
+
+  window._toggleCam = function() {
+    if (!stream) return;
+    camOff = !camOff;
+    stream.getVideoTracks().forEach(t => t.enabled = !camOff);
+    document.getElementById("camPlaceholder").style.display = camOff ? "flex" : "none";
+    document.getElementById("camBtn").style.opacity = camOff ? "0.4" : "1";
+  };
+
+  window._endExam = function() {
+    showToast("Ending exam...", "warn");
+    setTimeout(() => finishExam(), 1500);
+  };
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function markChecking(id) { document.getElementById(id).className = "check-item loading"; }
+  function markDone(id) {
+    const el = document.getElementById(id);
+    el.className = "check-item done";
+    el.querySelector(".check-circle").innerHTML =
+      `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  }
+  function markFail(id, msg) {
+    const el = document.getElementById(id);
+    el.className = "check-item fail";
+    el.innerHTML += ` <span style="color:#EF4444;font-size:12px;">: ${msg}</span>`;
+  }
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ── Start ──────────────────────────────────────────────────────────────────
+  init();
+</script>
+
+
+<!-- TOAST NOTIFICATION -->
+<div id="vivaToast" style="
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#1f2937; color:#fff; padding:12px 24px; border-radius:10px;
+  font-size:14px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  transition:transform 0.3s ease, opacity 0.3s ease; opacity:0;
+  z-index:9999; pointer-events:none; white-space:nowrap;
+  display:flex; align-items:center; gap:10px;">
+  <span id="vivaToastIcon" style="width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);"></span>
+  <span id="vivaToastMsg">Done</span>
+</div>
+<script>
+  function showToast(msg, type) {
+    const t    = document.getElementById("vivaToast");
+    const icon = document.getElementById("vivaToastIcon");
+    const txt  = document.getElementById("vivaToastMsg");
+    txt.textContent  = msg;
+    icon.innerHTML = type === "error"
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      : type === "warn"
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    t.style.background = type === "error" ? "#991B1B" : type === "warn" ? "#1a3a7c" : "#111827";
+    t.style.opacity   = "1";
+    t.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      t.style.opacity   = "0";
+      t.style.transform = "translateX(-50%) translateY(80px)";
+    }, 3000);
+  }
+</script>
+</body>
+</html>

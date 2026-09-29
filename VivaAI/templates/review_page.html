@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VivaAI - Review Student</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/review_page.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="nav-brand" href="/instructor">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16Z"/>
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16Z"/>
+    </svg>
+    VivaAI
+  </a>
+  <div class="nav-right">
+    <div class="nav-avatar" id="navAvatar">--</div>
+    <span class="nav-name" id="navName">Loading...</span>
+    <button class="btn-logout" id="logoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <button class="back-btn" onclick="window.location.href='/instructor'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <a href="/instructor">Dashboard</a>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span id="breadcrumbGroup">Group</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <span id="breadcrumbStudent">Student</span>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loadingState" style="text-align:center;padding:60px;color:#9CA3AF;">
+    Loading student review...
+  </div>
+
+  <!-- Main content (hidden until loaded) -->
+  <div id="mainContent" style="display:none;">
+
+    <!-- STUDENT HEADER -->
+    <div class="student-header">
+      <div class="student-info">
+        <div class="student-avatar" id="studentAvatar">--</div>
+        <div>
+          <div class="student-name" id="studentName">Loading...</div>
+          <div class="student-meta">
+            <span id="studentIdSpan"></span>
+            <span>·</span>
+            <span id="courseNameSpan"></span>
+            <span>·</span>
+            <span id="groupNameSpan"></span>
+            <span>·</span>
+            <span class="pill" id="flagPill">Pending</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-success btn-sm" id="clearFlagBtn" onclick="clearFlag()" style="display:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Clear Flag
+        </button>
+        <button class="btn btn-danger btn-sm" id="confirmFlagBtn" onclick="confirmFlag()" style="display:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          Confirm Flag
+        </button>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div class="two-col">
+
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- VIDEO -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Exam Recording
+          </div>
+          <div id="videoTabBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
+          <div class="video-container" id="videoContainer">
+            <div class="video-placeholder" id="videoPlaceholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              <p id="videoStatus">Loading recording...</p>
+            </div>
+            <video id="examVideo" style="display:none;width:100%;height:100%;object-fit:cover;" controls></video>
+          </div>
+          <div class="video-controls" style="margin-top:12px;">
+            <a id="downloadBtn" href="#" download style="display:none;">
+              <button class="btn btn-secondary btn-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Download Recording
+              </button>
+            </a>
+          </div>
+        </div>
+
+        <!-- QUESTIONS -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Questions Asked
+          </div>
+          <div class="question-list" id="questionList">
+            <div style="color:#9CA3AF;font-size:14px;">Loading questions...</div>
+          </div>
+        </div>
+
+        <!-- TRANSCRIPT -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Transcript
+          </div>
+          <div class="transcript-box" id="transcriptBox">
+            <span style="color:#9CA3AF;font-size:14px;">Transcript will appear here once processing is complete.</span>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+            <button class="btn btn-secondary btn-sm" id="downloadTranscriptBtn" style="display:none;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Download full transcript
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- AI SCORES -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            AI Analysis
+          </div>
+
+          <div class="ai-decision" id="aiDecision">
+            <div class="ai-icon" id="aiIcon"></div>
+            <div>
+              <div class="ai-decision-title" id="aiDecisionTitle">Analyzing...</div>
+              <div class="ai-decision-sub" id="aiDecisionSub">Results pending</div>
+            </div>
+          </div>
+
+          <div class="score-row">
+            <div class="score-card">
+              <div class="score-label">Contribution Score</div>
+              <div class="score-value" id="scoreValue" style="color:#9CA3AF;">—</div>
+              <div class="score-tag" id="scoreTag">Pending</div>
+            </div>
+            <div class="score-card">
+              <div class="score-label">Exam Status</div>
+              <div class="score-value" id="examStatusValue" style="font-size:16px;">—</div>
+              <div class="score-tag tag-blue" id="examStatusTag">—</div>
+            </div>
+          </div>
+
+          <div id="analysisPending" style="color:#9CA3AF;font-size:13px;padding:8px 0;">
+            Analysis will appear after the exam recording is processed.
+          </div>
+        </div>
+
+        <!-- REVIEW FORM -->
+        <div class="card card-review">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Instructor Review
+          </div>
+
+          <div class="form-group">
+            <label>Final Decision</label>
+            <select id="finalDecision">
+              <option value="pending">Keep Pending</option>
+              <option value="authentic">Mark as Authentic</option>
+              <option value="freerider">Confirm as Free Rider</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Final Grade</label>
+            <div class="grade-big">
+              <input class="grade-input-big" type="text" id="gradeInput" placeholder="—" maxlength="3"/>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="form-group">
+            <label>Feedback to Student</label>
+            <textarea id="feedbackInput" placeholder="Write your feedback..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Internal Notes (not visible to student)</label>
+            <textarea id="notesInput" placeholder="" style="min-height:70px;"></textarea>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
+            <button class="btn btn-secondary" onclick="window.location.href='/instructor'">Cancel</button>
+            <button class="btn btn-primary" onclick="saveReview()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Save Review
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logOut, db } from "/static/js/firebase.js";
+  import {
+    getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+  const fdb = getFirestore(getApp());
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentUser = null;
+  let studentData = null;
+  let resultData  = null;
+  let examData    = null;
+  let studentId   = null;
+  let resultId    = null;
+
+  async function init() {
+    currentUser = await requireAuth("instructor");
+    if (!currentUser) return;
+
+    // Set navbar
+    const initials = currentUser.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+    document.getElementById("navAvatar").textContent = initials;
+    document.getElementById("navName").textContent   = currentUser.name;
+    document.getElementById("logoutBtn").onclick     = logOut;
+
+    // Get studentId and submissionId from URL
+    const params       = new URLSearchParams(window.location.search);
+    studentId          = params.get("studentId");
+    const submissionId = params.get("submissionId");
+
+    if (!studentId || !submissionId) {
+      document.getElementById("loadingState").textContent = "Missing student or submission ID.";
+      return;
+    }
+
+    await loadReview(studentId, submissionId);
+  }
+
+  async function loadReview(sid, subId) {
+    try {
+      // Load student profile
+      const userSnap = await getDoc(doc(fdb, "users", sid));
+      if (!userSnap.exists()) throw new Error("Student not found.");
+      studentData = userSnap.data();
+
+      // Load exam data
+      const examId   = `${subId}_${sid}`;
+      const examSnap = await getDoc(doc(fdb, "exams", examId));
+      examData       = examSnap.exists() ? examSnap.data() : null;
+
+      // Load result
+      const resultSnap = await getDoc(doc(fdb, "results", examId));
+      resultData       = resultSnap.exists() ? resultSnap.data() : null;
+      resultId         = examId;
+
+      // Load submission title
+      const subSnap  = await getDoc(doc(fdb, "submissions", subId));
+      const subTitle = subSnap.exists() ? subSnap.data().title : subId;
+
+      // Find group name
+      let groupName  = "—";
+      let courseName = examData?.courseName || "—";
+      const coursesSnap = await getDocs(collection(fdb, "courses"));
+      for (const cDoc of coursesSnap.docs) {
+        const gSnap = await getDocs(collection(fdb, "courses", cDoc.id, "groups"));
+        for (const gDoc of gSnap.docs) {
+          if ((gDoc.data().memberIds||[]).includes(sid)) {
+            groupName  = gDoc.data().name;
+            courseName = cDoc.data().name;
+          }
+        }
+      }
+
+      // ── Populate UI ─────────────────────────────────────────────────────────
+      document.getElementById("loadingState").style.display  = "none";
+      document.getElementById("mainContent").style.display   = "block";
+
+      // Navbar + breadcrumb
+      const initials = studentData.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+      document.getElementById("studentAvatar").textContent   = initials;
+      document.getElementById("studentName").textContent     = studentData.name;
+      document.getElementById("studentIdSpan").textContent   = `ID: ${studentData.studentId||"—"}`;
+      document.getElementById("courseNameSpan").textContent  = courseName;
+      document.getElementById("groupNameSpan").textContent   = groupName;
+      document.getElementById("breadcrumbGroup").textContent = `${courseName} - ${groupName}`;
+      document.getElementById("breadcrumbStudent").textContent = studentData.name;
+
+      // Flag pill
+      const flagged      = resultData?.freeRiderFlag ?? false;
+      const needsReviewTop = resultData?.mandatoryReview ?? false;
+      const flagPill      = document.getElementById("flagPill");
+      if (resultData && resultData.authenticProb !== null && resultData.authenticProb !== undefined) {
+        if (needsReviewTop) {
+          flagPill.textContent  = "Needs Review";
+          flagPill.className    = "pill";
+          flagPill.style.background = "#FEF3C7";
+          flagPill.style.color = "#92400E";
+        } else {
+          flagPill.textContent  = flagged ? "Flagged: Free Rider" : "Authentic";
+          flagPill.className    = `pill ${flagged ? "pill-red" : "pill-green"}`;
+          flagPill.style.background = "";
+          flagPill.style.color = "";
+        }
+        document.getElementById("clearFlagBtn").style.display   = flagged ? "inline-flex" : "none";
+        document.getElementById("confirmFlagBtn").style.display = flagged ? "none" : "inline-flex";
+      } else if (resultData?.pipelineStatus === "error") {
+        flagPill.textContent = "Processing Error";
+        flagPill.className   = "pill pill-red";
+      } else if (resultData?.pipelineStatus === "pending_video" && (resultData?.missingQuestions || []).length > 0) {
+        flagPill.textContent = "Incomplete";
+        flagPill.className   = "pill pill-gray";
+      } else {
+        flagPill.textContent = "Pending";
+        flagPill.className   = "pill pill-gray";
+      }
+
+      // Video: load per-question recordings from disk
+      const examIdForVideo = `${subId}_${sid}`;
+      try {
+        const vResp  = await fetch(`/api/video/list/${examIdForVideo}`);
+        const vData  = await vResp.json();
+        const videos = vData.videos || [];
+        const tabBar = document.getElementById("videoTabBar");
+        if (videos.length > 0) {
+          videos.forEach((v, idx) => {
+            const btn = document.createElement("button");
+            btn.className   = `btn btn-sm ${idx === 0 ? "btn-primary" : "btn-secondary"}`;
+            btn.textContent = `Q${v.question}`;
+            btn.onclick     = () => {
+              tabBar.querySelectorAll("button").forEach(b => b.className = "btn btn-secondary btn-sm");
+              btn.className = "btn btn-primary btn-sm";
+              const videoEl = document.getElementById("examVideo");
+              videoEl.src   = v.url;
+              videoEl.style.display = "block";
+              document.getElementById("videoPlaceholder").style.display = "none";
+              const dlBtn = document.getElementById("downloadBtn");
+              dlBtn.href  = v.url;
+              dlBtn.style.display = "inline";
+            };
+            tabBar.appendChild(btn);
+          });
+          // Auto-load first question
+          tabBar.querySelector("button").click();
+        } else {
+          document.getElementById("videoStatus").textContent =
+            examData?.status === "completed" ? "Recording is processing, check back shortly" : "No recordings yet";
+        }
+      } catch(e) {
+        document.getElementById("videoStatus").textContent = "Could not load recordings.";
+      }
+
+      // Exam status: this reflects whether the RECORDING SESSION finished
+      // (student clicked through all questions), which is separate from
+      // whether the videos actually processed successfully. A student can
+      // finish recording but still show "Incomplete" in Contribution Score
+      // if a video failed to save/process, that's not a contradiction.
+      const status = examData?.status || "not_started";
+      document.getElementById("examStatusValue").textContent = status === "completed" ? "Recorded" : status === "in_progress" ? "In Progress" : "—";
+      document.getElementById("examStatusTag").textContent   = "Recording session";
+
+      // Questions
+      const questions = examData?.questions || [];
+      const qList     = document.getElementById("questionList");
+      if (questions.length === 0) {
+        qList.innerHTML = `<div style="color:#9CA3AF;font-size:14px;">No questions found.</div>`;
+      } else {
+        qList.innerHTML = questions.map((q, i) => `
+          <div class="question-item ${i===0?'active':''}">
+            <div class="q-label">Question ${i+1}</div>
+            <div class="q-text">${q}</div>
+          </div>`).join("");
+      }
+
+      // AI scores
+      if (resultData && resultData.authenticProb !== null && resultData.authenticProb !== undefined) {
+        const prob               = resultData.authenticProb;
+        const confidence         = resultData.confidence;
+        // isFR reflects the AI's own call (GRU's prediction) for display
+        // purposes here, NOT the same as resultData.freeRiderFlag, which
+        // now means "resolved AND confident" (used only to decide who
+        // shows up on the dashboard's Flagged Students page).
+        const isFR               = resultData.prediction === "free_rider";
+        const needsReview        = resultData.mandatoryReview;
+        const modelDisagreement  = resultData.modelDisagreement;
+        const grayZone           = resultData.grayZone;
+        const qualityFlag        = resultData.qualityFlag;
+        const confidencePct      = Math.round((confidence || 0) * 100);
+        const isLowConfidence    = confidencePct < 40;  // matches gray-zone width
+
+        // Hide pending message
+        document.getElementById("analysisPending").style.display = "none";
+
+        // AI decision banner
+        const aiDecision = document.getElementById("aiDecision");
+
+        if (needsReview) {
+          // A disagreement/gray-zone/quality-flag case is NOT a settled
+          // verdict, style it distinctly so it doesn't read as a
+          // confident "Authentic"/"Free Rider" the way a clean case does.
+          // Color comes from the .needs-review class in review_page.css.
+          aiDecision.className = "ai-decision needs-review";
+          document.getElementById("aiDecisionTitle").textContent = "Needs Manual Review";
+          document.getElementById("aiDecisionSub").textContent = (qualityFlag && !modelDisagreement && !grayZone)
+            ? "Recording quality made this hard to assess."
+            : "AI wasn't confident enough to decide.";
+          document.getElementById("aiIcon").innerHTML =
+            `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`;
+        } else {
+          aiDecision.className = `ai-decision ${isFR ? "" : "authentic"}`;
+          document.getElementById("aiDecisionTitle").textContent = isFR ? "Free Rider Detected" : "Authentic Student";
+          document.getElementById("aiDecisionSub").textContent   =
+            `${confidencePct}% confident.`;
+          document.getElementById("aiIcon").innerHTML = isFR
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`;
+        }
+
+        // Score cards
+        document.getElementById("scoreValue").textContent    = needsReview ? "Manual Review" : (isFR ? "Free Rider" : "Authentic");
+        document.getElementById("scoreValue").style.color    = needsReview ? "#D97706" : (isFR ? "#DC2626" : "#059669");
+        document.getElementById("scoreTag").textContent      = needsReview ? "Needs review" : (isFR ? "Below threshold" : "Above threshold");
+        document.getElementById("scoreTag").className        = `score-tag ${needsReview ? "tag-yellow" : (isFR ? "tag-red" : "tag-green")}`;
+        if (needsReview) {
+          // Plain-language reason instead of a raw confidence number,
+          // instructors need to know WHY it needs their judgment, not
+          // the model math behind it. No second tag here since the AI
+          // Analysis banner above already states the full reason.
+          const reviewReason = (qualityFlag && !modelDisagreement && !grayZone)
+            ? "Recording quality issue"
+            : "AI not confident";
+          document.getElementById("examStatusValue").textContent = reviewReason;
+          document.getElementById("examStatusValue").style.fontSize = "16px";
+          document.getElementById("examStatusTag").textContent   = "";
+        } else {
+          document.getElementById("examStatusValue").textContent = `${confidencePct}%`;
+          document.getElementById("examStatusValue").style.fontSize = "";
+          document.getElementById("examStatusTag").textContent   = "Confidence";
+        }
+
+      } else {
+        const missing = resultData?.missingQuestions || [];
+
+        if (resultData?.pipelineStatus === "error") {
+          document.getElementById("aiDecisionTitle").textContent = "Processing Failed";
+          document.getElementById("aiDecisionSub").textContent   =
+            "AI pipeline hit an error. Review manually.";
+          document.getElementById("scoreValue").textContent = "Error";
+          document.getElementById("scoreValue").style.color = "#9CA3AF";
+          document.getElementById("scoreTag").textContent   = "Processing failed";
+        } else if (resultData?.pipelineStatus === "pending_video" && missing.length > 0) {
+          // The exam is missing one or more question recordings, this
+          // will never auto-complete without the student re-recording,
+          // so it needs a different message than "still processing."
+          const missingLabels = missing.map(q => q.toUpperCase()).join(", ");
+          document.getElementById("aiDecisionTitle").textContent = "Incomplete Exam";
+          document.getElementById("aiDecisionSub").textContent   =
+            `Missing ${missingLabels}.`;
+          document.getElementById("scoreValue").textContent = "Incomplete";
+          document.getElementById("scoreValue").style.color = "#9CA3AF";
+          document.getElementById("scoreTag").textContent   = `Missing ${missingLabels}`;
+        } else {
+          document.getElementById("aiDecisionTitle").textContent = "Awaiting Analysis";
+          document.getElementById("aiDecisionSub").textContent   =
+            "Processing recording.";
+          document.getElementById("scoreValue").textContent = "—";
+          document.getElementById("scoreValue").style.color = "#9CA3AF";
+          document.getElementById("scoreTag").textContent   = "Pending";
+        }
+      }
+
+      // Transcript: per-question from Whisper
+      const transcriptBox = document.getElementById("transcriptBox");
+      const byQ = resultData?.transcriptByQ || {};
+      const combined = resultData?.transcript || "";
+      const fillerWords = ["um","uh","like","you know","i mean","basically","sort of","kind of","so","actually","literally","right","okay","well"];
+
+      if (Object.keys(byQ).length > 0) {
+        // Show per-question transcripts
+        let html = "";
+        for (let i = 1; i <= 5; i++) {
+          const t = byQ[`q${i}`];
+          if (t) {
+            let highlighted = t;
+            fillerWords.forEach(w => {
+              const regex = new RegExp(`\\b(${w})\\b`, "gi");
+              highlighted = highlighted.replace(regex, `<span class="highlight">$1</span>`);
+            });
+            html += `<div style="margin-bottom:16px;">
+              <div style="font-size:11px;font-weight:700;color:#1a3a7c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Question ${i}</div>
+              <div style="font-size:14px;line-height:1.6;color:#374151;">${highlighted}</div>
+            </div>`;
+          }
+        }
+        if (html) {
+          transcriptBox.innerHTML = html;
+          document.getElementById("downloadTranscriptBtn").style.display = "inline-flex";
+        } else {
+          transcriptBox.innerHTML = `<span style="color:#9CA3AF;font-size:14px;">No speech detected in the recordings.</span>`;
+        }
+      } else if (combined) {
+        // Fallback: show combined transcript
+        let highlighted = combined;
+        fillerWords.forEach(w => {
+          const regex = new RegExp(`\\b(${w})\\b`, "gi");
+          highlighted = highlighted.replace(regex, `<span class="highlight">$1</span>`);
+        });
+        transcriptBox.innerHTML = highlighted;
+        document.getElementById("downloadTranscriptBtn").style.display = "inline-flex";
+      } else {
+        transcriptBox.innerHTML = `<span style="color:#9CA3AF;font-size:14px;">${
+          examData?.status === "completed"
+            ? "No speech detected. The student may not have spoken during the exam."
+            : "Transcript will appear here after the exam is completed."
+        }</span>`;
+      }
+
+      // Pre-fill review form if already reviewed
+      if (resultData?.grade)         document.getElementById("gradeInput").value    = resultData.grade;
+      if (resultData?.feedback)      document.getElementById("feedbackInput").value  = resultData.feedback;
+      if (resultData?.internalNotes) document.getElementById("notesInput").value     = resultData.internalNotes;
+      if (resultData?.decision)      document.getElementById("finalDecision").value  = resultData.decision;
+
+    } catch(err) {
+      document.getElementById("loadingState").textContent = "Error loading review: " + err.message;
+    }
+  }
+
+  // ── Save review ────────────────────────────────────────────────────────────
+  window.saveReview = async function() {
+    const grade    = document.getElementById("gradeInput").value.trim();
+    const feedback = document.getElementById("feedbackInput").value.trim();
+    const notes    = document.getElementById("notesInput").value.trim();
+    const decision = document.getElementById("finalDecision").value;
+
+    try {
+      await updateDoc(doc(fdb, "results", resultId), {
+        grade,
+        feedback,
+        internalNotes: notes,
+        decision,
+        freeRiderFlag: decision === "freerider",
+        // A human has now made the call, this is no longer a pending
+        // AI-uncertain case, regardless of which trigger originally
+        // sent it here.
+        mandatoryReview: false,
+        reviewedAt: serverTimestamp()
+      });
+      showToast("Review saved successfully");
+      window.location.href = "/instructor";
+    } catch(err) {
+      showToast("Error saving review: " + err.message, "error");
+    }
+  };
+
+  // ── Clear / Confirm flag ───────────────────────────────────────────────────
+  window.clearFlag = async function() {
+    await updateDoc(doc(fdb, "results", resultId), { freeRiderFlag: false, mandatoryReview: false });
+    showToast("Flag cleared");
+    window.location.reload();
+  };
+
+  window.confirmFlag = async function() {
+    await updateDoc(doc(fdb, "results", resultId), { freeRiderFlag: true, mandatoryReview: false });
+    showToast("Flag confirmed, student marked as free rider", "warn");
+    window.location.reload();
+  };
+
+  init();
+</script>
+
+
+<!-- TOAST NOTIFICATION -->
+<div id="vivaToast" style="
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#1f2937; color:#fff; padding:12px 24px; border-radius:10px;
+  font-size:14px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  transition:transform 0.3s ease, opacity 0.3s ease; opacity:0;
+  z-index:9999; pointer-events:none; white-space:nowrap;
+  display:flex; align-items:center; gap:10px;">
+  <span id="vivaToastIcon" style="width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);"></span>
+  <span id="vivaToastMsg">Done</span>
+</div>
+<script>
+  function showToast(msg, type) {
+    const t    = document.getElementById("vivaToast");
+    const icon = document.getElementById("vivaToastIcon");
+    const txt  = document.getElementById("vivaToastMsg");
+    txt.textContent  = msg;
+    icon.innerHTML = type === "error"
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      : type === "warn"
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    t.style.background = type === "error" ? "#991B1B" : type === "warn" ? "#1a3a7c" : "#111827";
+    t.style.opacity   = "1";
+    t.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      t.style.opacity   = "0";
+      t.style.transform = "translateX(-50%) translateY(80px)";
+    }, 3000);
+  }
+</script>
+</body>
+</html>

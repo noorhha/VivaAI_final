@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VivaAI - Student Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/student_portal.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand" id="navBrand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16Z"/>
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16Z"/>
+    </svg>
+    VivaAI
+  </div>
+  <div class="nav-right">
+    <div class="nav-avatar" id="navAvatar">--</div>
+    <span class="nav-name" id="navName">Loading...</span>
+    <button class="btn-logout" id="logoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-label">Menu</div>
+    <button class="nav-item active" id="nav-courses" onclick="showPage('courses', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      My Courses
+    </button>
+    <button class="nav-item" id="nav-results" onclick="showPage('results', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      All Results
+    </button>
+  </aside>
+
+  <main class="main">
+
+    <!-- MY COURSES -->
+    <div class="page-section active" id="page-courses">
+      <div id="view-course-list">
+        <div class="page-header" style="margin-bottom:24px;">
+          <div>
+            <div class="page-title">My Courses</div>
+          </div>
+        </div>
+        <div id="courses-loading" style="text-align:center;padding:40px;color:#9CA3AF;">Loading your courses...</div>
+        <div class="courses-grid" id="courses-grid" style="display:none;"></div>
+        <div id="courses-empty" style="display:none;text-align:center;padding:40px;color:#9CA3AF;">
+          You are not enrolled in any courses yet. Ask your instructor to add you.
+        </div>
+      </div>
+
+      <div id="view-course-detail" style="display:none;flex-direction:column;gap:24px;">
+        <button class="back-btn" onclick="backToCourses()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back to courses
+        </button>
+        <div class="page-header">
+          <div>
+            <div style="font-size:13px;color:#9CA3AF;" id="det-code"></div>
+            <div class="page-title" id="det-name"></div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <button class="tab-btn active" id="tb-submissions" onclick="switchTabs('submissions')">Submissions</button>
+          <button class="tab-btn" id="tb-group" onclick="switchTabs('group')">My Group</button>
+          <button class="tab-btn" id="tb-results" onclick="switchTabs('results')">Results</button>
+        </div>
+        <div class="tab-content active" id="tc-submissions">
+          <div id="submissions-loading" style="text-align:center;padding:40px;color:#9CA3AF;">Loading submissions...</div>
+          <div id="submissions-list"></div>
+        </div>
+        <div class="tab-content" id="tc-group">
+          <div id="group-loading" style="text-align:center;padding:40px;color:#9CA3AF;">Loading group...</div>
+          <div id="group-content"></div>
+        </div>
+        <div class="tab-content" id="tc-results">
+          <div class="card">
+            <div class="card-title">Exam Results</div>
+            <div id="results-content" style="color:#9CA3AF;font-size:14px;padding:12px 0;">
+              No results yet. Results appear here after your exam is reviewed.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALL RESULTS -->
+    <div class="page-section" id="page-results">
+      <div class="page-header">
+        <div>
+          <div class="page-title">All Results</div>
+        </div>
+      </div>
+      <div class="card">
+        <div id="all-results-content" style="color:#9CA3AF;font-size:14px;padding:12px 0;">Loading results...</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Custom Upload Confirm Modal -->
+<div id="uploadConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);margin:20px;">
+    <div style="font-size:18px;font-weight:700;color:#111827;margin-bottom:8px;">Confirm Upload</div>
+    <div style="font-size:14px;color:#6B7280;margin-bottom:6px;">You are about to upload:</div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 16px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:600;color:#111827;" id="confirmFileName">filename.pdf</div>
+      <div style="font-size:12px;color:#9CA3AF;" id="confirmFileType">Report</div>
+    </div>
+    <div style="font-size:13px;color:#F59E0B;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:20px;">
+      Make sure this is the correct file before confirming.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="cancelUpload()" style="padding:10px 20px;border:1px solid #E5E7EB;border-radius:8px;background:white;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Cancel</button>
+      <button onclick="confirmUpload()" style="padding:10px 20px;border:none;border-radius:8px;background:#1a3a7c;color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Yes, Upload</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function showPage(page, el) {
+    document.querySelectorAll(".page-section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    document.getElementById("page-" + page).classList.add("active");
+    if (el) el.classList.add("active");
+  }
+
+  function backToCourses() {
+    document.getElementById("view-course-detail").style.display = "none";
+    document.getElementById("view-course-list").style.display   = "block";
+  }
+
+  function switchTabs(tab) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    document.getElementById("tb-" + tab).classList.add("active");
+    document.getElementById("tc-" + tab).classList.add("active");
+  }
+
+  async function startExam(examId) {
+    // Check exam is actually ready before redirecting
+    const btn = document.querySelector(`[onclick="startExam('${examId}')"]`);
+    if (btn) { btn.disabled = true; btn.textContent = "Checking..."; }
+
+    try {
+      const res  = await fetch(`/api/exam/status/${examId}`);
+      const data = await res.json();
+
+      if (data.status === "ready") {
+        window.location.href = "/exam?id=" + examId;
+      } else if (data.status === "pending" || data.status === "not_found") {
+        // Show preparing state, poll every 5 seconds
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Preparing exam...`;
+        }
+        // Update banner text
+        const banner = document.getElementById(`exam-ready-${examId.split('_')[0]}`);
+        if (banner) {
+          banner.querySelector('.exam-banner-title').textContent = "Preparing Exam";
+          banner.querySelector('.exam-banner-sub').textContent   = "This usually takes about 30 seconds.";
+        }
+        // Poll until ready
+        const poll = setInterval(async () => {
+          const r = await fetch(`/api/exam/status/${examId}`);
+          const d = await r.json();
+          if (d.status === "ready") {
+            clearInterval(poll);
+            window.location.href = "/exam?id=" + examId;
+          }
+        }, 5000);
+      }
+    } catch(e) {
+      if (btn) { btn.disabled = false; btn.textContent = "Start Exam"; }
+      showToast("Could not check exam status. Try again.", "error");
+    }
+  }
+
+  // ── Upload confirm modal ───────────────────────────────────────────────────
+  let _pendingUpload = null;
+
+  function showUploadConfirm(subId, fileType, file, totalRequired) {
+    _pendingUpload = { subId, fileType, file, totalRequired };
+    const labels = { report: "Report" };
+    document.getElementById("confirmFileName").textContent = file.name;
+    document.getElementById("confirmFileType").textContent = labels[fileType] || fileType;
+    document.getElementById("uploadConfirmModal").style.display = "flex";
+  }
+
+  function cancelUpload() {
+    document.getElementById("uploadConfirmModal").style.display = "none";
+    if (_pendingUpload) {
+      const input = document.getElementById(`file-${_pendingUpload.subId}-${_pendingUpload.fileType}`);
+      if (input) input.value = "";
+    }
+    _pendingUpload = null;
+  }
+
+  function confirmUpload() {
+    document.getElementById("uploadConfirmModal").style.display = "none";
+    if (_pendingUpload) {
+      const { subId, fileType, file, totalRequired } = _pendingUpload;
+      _pendingUpload = null;
+      window._doUpload(subId, fileType, file, totalRequired);
+    }
+  }
+</script>
+
+<script type="module">
+  import { requireAuth, logOut, auth, db, storage } from "/static/js/firebase.js";
+  import {
+    collection, query, where, getDocs, getDoc, doc, updateDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    ref, uploadBytesResumable, getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentUser   = null;
+  let currentCourse = null;
+  let uploadedFiles = {};
+
+  // ── Init ── wrapped in async function to avoid illegal return ──────────────
+  async function init() {
+    currentUser = await requireAuth("student");
+    if (!currentUser) return;
+
+    const initials = currentUser.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
+    document.getElementById("navAvatar").textContent = initials;
+    document.getElementById("navName").textContent   = currentUser.name;
+    document.getElementById("logoutBtn").onclick     = logOut;
+    document.getElementById("navBrand").onclick      = () => {
+      backToCourses();
+      showPage("courses", document.getElementById("nav-courses"));
+    };
+
+    await loadCourses();
+    await loadAllResults();
+  }
+
+  // ── Load courses ───────────────────────────────────────────────────────────
+  async function loadCourses() {
+    try {
+      const coursesSnap = await getDocs(collection(db, "courses"));
+      const myCourses   = [];
+
+      for (const courseDoc of coursesSnap.docs) {
+        const groupsSnap = await getDocs(collection(db, "courses", courseDoc.id, "groups"));
+        for (const gDoc of groupsSnap.docs) {
+          if ((gDoc.data().memberIds || []).includes(currentUser.uid)) {
+            myCourses.push({
+              courseId:  courseDoc.id,
+              groupId:   gDoc.id,
+              groupName: gDoc.data().name,
+              ...courseDoc.data()
+            });
+          }
+        }
+      }
+
+      document.getElementById("courses-loading").style.display = "none";
+
+      if (myCourses.length === 0) {
+        document.getElementById("courses-empty").style.display = "block";
+        return;
+      }
+
+      const grid = document.getElementById("courses-grid");
+      grid.style.display = "grid";
+
+      const colors     = ["linear-gradient(90deg,#1a3a7c,#6b8fd4)","linear-gradient(90deg,#0EA5E9,#38BDF8)","linear-gradient(90deg,#10B981,#34D399)","linear-gradient(90deg,#F59E0B,#FCD34D)"];
+      const textColors = ["#1a3a7c","#0EA5E9","#10B981","#F59E0B"];
+
+      myCourses.forEach((course, i) => {
+        const card = document.createElement("div");
+        card.className = "course-card";
+        card.onclick   = () => openCourse(course);
+        card.innerHTML = `
+          <div class="course-banner" style="background:${colors[i%colors.length]};"></div>
+          <div class="course-body">
+            <div class="course-code" style="color:${textColors[i%textColors.length]};">${course.code||""}</div>
+            <div class="course-name">${course.name}</div>
+            <div class="course-meta">${course.groupName}</div>
+            <div class="course-footer"><span class="pill pill-blue">Enrolled</span></div>
+          </div>`;
+        grid.appendChild(card);
+      });
+
+    } catch (err) {
+      document.getElementById("courses-loading").textContent = "Error: " + err.message;
+    }
+  }
+
+  // ── Open course ────────────────────────────────────────────────────────────
+  async function openCourse(course) {
+    currentCourse = course;
+    document.getElementById("view-course-list").style.display   = "none";
+    document.getElementById("view-course-detail").style.display = "flex";
+    document.getElementById("det-code").textContent = course.code || "";
+    document.getElementById("det-name").textContent = course.name;
+    await loadSubmissions(course);
+    await loadGroup(course);
+    await loadCourseResults(course);
+  }
+
+  // ── Load in-course results tab ─────────────────────────────────────────────
+  async function loadCourseResults(course) {
+    const container = document.getElementById("results-content");
+    container.innerHTML = `<span style="color:#9CA3AF;">Loading...</span>`;
+    try {
+      const q    = query(collection(db, "results"), where("studentId", "==", currentUser.uid));
+      const snap = await getDocs(q);
+
+      // Only show results for submissions belonging to this course
+      const subsSnap  = await getDocs(query(collection(db, "submissions"), where("courseId", "==", course.courseId)));
+      const courseSubIds = new Set(subsSnap.docs.map(d => d.id));
+      const relevant  = snap.docs.filter(d => courseSubIds.has(d.data().submissionId));
+
+      if (relevant.length === 0) {
+        container.innerHTML = `<span style="color:#9CA3AF;">No results yet. Results appear here after your exam is reviewed.</span>`;
+        return;
+      }
+
+      const rows = await Promise.all(relevant.map(async d => {
+        const r = d.data();
+        let subTitle = r.submissionId;
+        try {
+          const subDoc = await getDoc(doc(db, "submissions", r.submissionId));
+          if (subDoc.exists()) subTitle = subDoc.data().title || subTitle;
+        } catch(e) {}
+
+        const hasGrade = r.grade && r.grade.trim();
+        return `<div style="padding:14px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:8px;">
+          <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:6px;">${subTitle}</div>
+          ${hasGrade
+            ? `<div style="font-size:13px;color:#6B7280;margin-bottom:6px;">Grade: <strong style="font-size:20px;color:#1a3a7c;">${r.grade}</strong></div>
+               ${r.feedback ? `<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 12px;font-size:13px;color:#374151;">${r.feedback}</div>` : ""}`
+            : `<span style="font-size:13px;color:#9CA3AF;">Pending instructor review.</span>`}
+        </div>`;
+      }));
+
+      container.innerHTML = rows.join("");
+    } catch(err) {
+      container.innerHTML = `<span style="color:#9CA3AF;">Error loading results.</span>`;
+    }
+  }
+
+  // ── Load submissions ───────────────────────────────────────────────────────
+  async function loadSubmissions(course) {
+    const container = document.getElementById("submissions-list");
+    document.getElementById("submissions-loading").style.display = "block";
+    container.innerHTML = "";
+
+    try {
+      const q    = query(collection(db, "submissions"), where("courseId", "==", course.courseId));
+      const snap = await getDocs(q);
+      document.getElementById("submissions-loading").style.display = "none";
+
+      if (snap.empty) {
+        container.innerHTML = `<div style="color:#9CA3AF;font-size:14px;padding:12px 0;">No submissions yet. Your instructor will create them.</div>`;
+        return;
+      }
+
+      for (const subDoc of snap.docs) {
+        const sub  = { id: subDoc.id, ...subDoc.data() };
+        const data = subDoc.data();
+
+        // ── Load existing uploads from Firestore ──────────────────────────────
+        const existingUploads = data.uploads?.[currentUser.uid] || {};
+        if (Object.keys(existingUploads).length > 0) {
+          uploadedFiles[sub.id] = existingUploads;
+        }
+
+        container.appendChild(buildSubmissionCard(sub, course));
+      }
+    } catch (err) {
+      document.getElementById("submissions-loading").textContent = "Error: " + err.message;
+    }
+  }
+
+  // ── Build submission card ──────────────────────────────────────────────────
+  function buildSubmissionCard(sub, course) {
+    const card    = document.createElement("div");
+    card.className = "submission-card";
+    card.id        = `sub-${sub.id}`;
+
+    const uploads  = uploadedFiles[sub.id] || {};
+    // Report is the only required file; it's what feeds the AI question generation.
+    const needed = ["report"];
+    const done     = needed.filter(f => uploads[f]).length;
+    const pct      = Math.round((done / needed.length) * 100);
+    const allDone  = done === needed.length;
+    const examId   = `${sub.id}_${currentUser.uid}`;
+
+    card.innerHTML = `
+      <div class="sub-header">
+        <div>
+          <div class="sub-name">${sub.title||"Submission"}</div>
+          <div class="sub-meta"><span class="pill ${allDone?'pill-green':'pill-yellow'}">${allDone?'Submitted':'Not submitted'}</span></div>
+        </div>
+        <span class="pill pill-green">Open</span>
+      </div>
+      <div class="sub-body">
+        <div style="font-size:13px;color:#6B7280;">${allDone ? 'All files submitted. Upload is now locked.' : 'Upload your report below. The exam unlocks once it is submitted.'}</div>
+        <div style="display:flex;justify-content:center;">
+          <div style="width:100%;max-width:420px;">
+            ${buildUploadBox(sub.id,"report","Report","PDF or DOCX",".pdf,.docx",uploads.report, allDone)}
+          </div>
+        </div>
+        <div class="progress-row">
+          <span id="status-${sub.id}">${done} of ${needed.length} files uploaded</span>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="bar-${sub.id}" style="width:${pct}%"></div></div>
+          <span id="pct-${sub.id}" style="font-size:13px;font-weight:600;color:#1a3a7c;">${pct}%</span>
+        </div>
+        <div class="exam-banner locked" id="exam-locked-${sub.id}" style="${allDone?'display:none':''}">
+          <div><div class="exam-banner-title">Exam Locked</div><div class="exam-banner-sub">Upload all ${needed.length} files to unlock</div></div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="exam-banner" id="exam-ready-${sub.id}" style="${allDone?'':'display:none'}">
+          <div><div class="exam-banner-title">Exam Ready</div></div>
+          <button class="btn btn-primary" onclick="startExam('${examId}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Start Exam
+          </button>
+        </div>
+      </div>`;
+
+    setTimeout(() => {
+      needed.forEach(fileType => {
+        const input = document.getElementById(`file-${sub.id}-${fileType}`);
+        if (input) input.onchange = () => handleUpload(sub.id, fileType, input.files[0], needed.length);
+      });
+    }, 0);
+
+    return card;
+  }
+
+  function buildUploadBox(subId, fileType, label, desc, accept, url, locked=false) {
+    const uploaded = !!url;
+    const isLocked = locked && uploaded; // locked only if submitted AND this file done
+    const isDisabled = locked && !uploaded; // if locked but file missing, show disabled
+    return `
+      <div class="upload-box ${uploaded?'uploaded':''} ${isDisabled?'disabled':''}"
+           id="box-${subId}-${fileType}"
+           onclick="${isLocked || isDisabled ? '' : `document.getElementById('file-${subId}-${fileType}').click()`}"
+           style="${isLocked ? 'cursor:default;' : ''}">
+        <input type="file" id="file-${subId}-${fileType}" accept="${accept}" style="display:none" ${isLocked||isDisabled?'disabled':''}/>
+        <div class="upload-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="upload-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="upload-title">${label}</div>
+        <div class="upload-desc">${uploaded ? 'Submitted' : isDisabled ? 'Not uploaded' : desc}</div>
+        ${isLocked ? '<div style="font-size:10px;color:#10B981;margin-top:2px;">Locked</div>' : ''}
+      </div>`;
+  }
+
+  // Handle upload
+  async function handleUpload(subId, fileType, file, totalRequired) {
+    if (!file) return;
+    // Show custom confirm modal; actual upload happens in _doUpload
+    showUploadConfirm(subId, fileType, file, totalRequired);
+  }
+
+  // Called after user confirms in the modal
+  window._doUpload = async function(subId, fileType, file, totalRequired) {
+    const box = document.getElementById(`box-${subId}-${fileType}`);
+    box.style.opacity = "0.6";
+    box.querySelector(".upload-desc").textContent = "Uploading...";
+
+    try {
+      const storageRef = ref(storage, `submissions/${subId}/${currentUser.uid}/${fileType}_${file.name}`);
+      const task       = uploadBytesResumable(storageRef, file);
+
+      task.on("state_changed", null, null, async () => {
+        const url = await getDownloadURL(task.snapshot.ref);
+
+        await updateDoc(doc(db, "submissions", subId), {
+          [`uploads.${currentUser.uid}.${fileType}`]: url,
+          [`uploads.${currentUser.uid}.updatedAt`]:   serverTimestamp()
+        });
+
+        if (!uploadedFiles[subId]) uploadedFiles[subId] = {};
+        uploadedFiles[subId][fileType] = url;
+
+        box.classList.add("uploaded");
+        box.querySelector(".upload-desc").textContent = "Uploaded";
+        box.style.opacity = "1";
+
+        const done = Object.keys(uploadedFiles[subId]).length;
+        const pct  = Math.round((done / totalRequired) * 100);
+        document.getElementById(`status-${subId}`).textContent = `${done} of ${totalRequired} files uploaded`;
+        document.getElementById(`bar-${subId}`).style.width    = pct + "%";
+        document.getElementById(`pct-${subId}`).textContent    = pct + "%";
+
+        if (done >= totalRequired) {
+          document.getElementById(`exam-locked-${subId}`).style.display = "none";
+          document.getElementById(`exam-ready-${subId}`).style.display  = "";
+          fetch("/api/questions/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              submissionId: subId,
+              studentId:    currentUser.uid,
+              reportUrl:    uploadedFiles[subId].report  || "",
+              codeUrl:      uploadedFiles[subId].code    || "",
+              slidesUrl:    uploadedFiles[subId].slides  || ""
+            })
+          });
+        }
+      });
+    } catch (err) {
+      box.style.opacity = "1";
+      showToast("Upload failed: " + err.message, "error");
+    }
+  }
+
+  // ── Load group ─────────────────────────────────────────────────────────────
+  async function loadGroup(course) {
+    const container = document.getElementById("group-content");
+    document.getElementById("group-loading").style.display = "block";
+    container.innerHTML = "";
+
+    try {
+      const groupDoc = await getDoc(doc(db, "courses", course.courseId, "groups", course.groupId));
+      const group    = groupDoc.data();
+      const members  = group.memberIds || [];
+
+      const memberProfiles = await Promise.all(members.map(uid => getDoc(doc(db, "users", uid))));
+      document.getElementById("group-loading").style.display = "none";
+
+      const membersHTML = memberProfiles.map(m => {
+        const u        = m.data();
+        const initials = u.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
+        const isYou    = m.id === currentUser.uid;
+        return `<div class="member-row">
+          <div class="member-avatar">${initials}</div>
+          <div class="member-name">${u.name} ${isYou?'<span class="you-badge">You</span>':''}</div>
+          <div style="font-size:12px;color:#9CA3AF;">${u.studentId||""}</div>
+        </div>`;
+      }).join("");
+
+      container.innerHTML = `<div class="card">
+        <div class="card-title">${group.name} - ${course.name}</div>
+        <div class="group-card">
+          <div class="group-card-title"><span>Members (${members.length})</span><span class="pill pill-green">Active</span></div>
+          <div class="member-list">${membersHTML}</div>
+        </div>
+      </div>`;
+    } catch (err) {
+      document.getElementById("group-loading").textContent = "Error: " + err.message;
+    }
+  }
+
+  // ── Load all results ───────────────────────────────────────────────────────
+  async function loadAllResults() {
+    try {
+      const q    = query(collection(db, "results"), where("studentId", "==", currentUser.uid));
+      const snap = await getDocs(q);
+      const container = document.getElementById("all-results-content");
+
+      if (snap.empty) {
+        container.textContent = "No results yet. They will appear here after your exams are reviewed.";
+        return;
+      }
+
+      // Fetch submission names for each result
+      const rows = await Promise.all(snap.docs.map(async d => {
+        const r = d.data();
+        // Look up submission title and course name
+        let subTitle  = r.submissionId;
+        let courseName = "";
+        try {
+          const subDoc = await getDoc(doc(db, "submissions", r.submissionId));
+          if (subDoc.exists()) {
+            subTitle = subDoc.data().title || subTitle;
+            const cDoc = await getDoc(doc(db, "courses", subDoc.data().courseId));
+            if (cDoc.exists()) courseName = cDoc.data().name || "";
+          }
+        } catch(e) {}
+
+        const hasGrade = r.grade && r.grade.trim();
+        return `<div style="padding:16px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:2px;">${subTitle}</div>
+          ${courseName ? `<div style="font-size:12px;color:#9CA3AF;margin-bottom:8px;">${courseName}</div>` : ""}
+          <div style="font-size:13px;color:#6B7280;">
+            ${hasGrade
+              ? `<div style="margin-bottom:6px;">Grade: <strong style="font-size:18px;color:#1a3a7c;">${r.grade}</strong></div>
+                 ${r.feedback ? `<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 12px;color:#374151;">${r.feedback}</div>` : ""}`
+              : `<span style="color:#9CA3AF;">Pending</span>`}
+          </div>
+        </div>`;
+      }));
+
+      container.innerHTML = rows.join("");
+    } catch (err) {
+      document.getElementById("all-results-content").textContent = "Error loading results.";
+    }
+  }
+
+  // ── Start ──────────────────────────────────────────────────────────────────
+  init();
+</script>
+
+
+<!-- TOAST NOTIFICATION -->
+<div id="vivaToast" style="
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#1f2937; color:#fff; padding:12px 24px; border-radius:10px;
+  font-size:14px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  transition:transform 0.3s ease, opacity 0.3s ease; opacity:0;
+  z-index:9999; pointer-events:none; white-space:nowrap;
+  display:flex; align-items:center; gap:10px;">
+  <span id="vivaToastIcon" style="width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);"></span>
+  <span id="vivaToastMsg">Done</span>
+</div>
+<script>
+  function showToast(msg, type) {
+    const t    = document.getElementById("vivaToast");
+    const icon = document.getElementById("vivaToastIcon");
+    const txt  = document.getElementById("vivaToastMsg");
+    txt.textContent  = msg;
+    icon.innerHTML = type === "error"
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      : type === "warn"
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    t.style.background = type === "error" ? "#991B1B" : type === "warn" ? "#1a3a7c" : "#111827";
+    t.style.opacity   = "1";
+    t.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      t.style.opacity   = "0";
+      t.style.transform = "translateX(-50%) translateY(80px)";
+    }, 3000);
+  }
+</script>
+</body>
+</html>

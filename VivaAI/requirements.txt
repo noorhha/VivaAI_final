@@ -1,0 +1,95 @@
+# =============================================================================
+# VivaAI - Python Dependencies
+# =============================================================================
+# Install all dependencies with:
+#     pip install -r requirements.txt
+#
+# Additional system requirements (must be installed separately):
+#     - ffmpeg        : video re-encoding and audio extraction
+#                       macOS  : brew install ffmpeg
+#                       Ubuntu : sudo apt install ffmpeg
+#                       Windows: https://ffmpeg.org/download.html
+#
+#     - face_landmarker.task : MediaPipe face model (not a pip package)
+#                       Download with:
+#                       curl -O https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+#                       Place in the project root directory.
+# =============================================================================
+
+
+# -- Web Framework -------------------------------------------------------------
+# Flask serves the application and handles all API routes.
+flask==3.0.0
+flask-cors==4.0.0
+
+# Loads environment variables from the .env file (API keys, credentials).
+python-dotenv==1.0.0
+
+
+# -- Firebase --------------------------------------------------------------------
+# Firebase Admin SDK writes exam data and results to Firestore.
+firebase-admin==6.4.0
+
+
+# -- Video and Audio Processing --------------------------------------------------
+# OpenCV reads video frames for visual feature extraction (visual_features.py).
+opencv-python==4.9.0.80
+
+# MediaPipe detects face landmarks, blink events, head pose, and gaze direction.
+mediapipe==0.10.9
+
+# Librosa extracts audio features: pitch, energy, pause ratio, jitter (audio_features.py).
+librosa==0.10.1
+
+# Whisper transcribes speech to text with word-level timestamps (feature_extractor.py).
+openai-whisper==20231117
+
+
+# -- Machine Learning --------------------------------------------------------------
+# PyTorch runs the trained GRU model (transcript_temporal.pt), the primary
+# decision model. Install the CPU version above, or visit https://pytorch.org
+# for GPU versions.
+torch>=2.0.0
+
+# Loads the saved Random Forest model (transcript_baseline.joblib) and the
+# GRU's preprocessing bundle (transcript_temporal_preprocessing.joblib).
+joblib>=1.3.0
+
+# Scikit-learn is required to unpickle the saved RandomForestClassifier
+# (transcript_baseline.joblib) even though inference.py never imports it
+# directly, joblib needs it installed to reconstruct the model object.
+scikit-learn==1.4.1
+
+
+# -- Data ---------------------------------------------------------------------------
+numpy==1.26.4
+pandas==2.2.1
+
+
+# -- External APIs ------------------------------------------------------------------
+# OpenAI client used for GPT-based question generation and TTS (onyx voice).
+openai==1.12.0
+
+# pypdf, python-docx, and mammoth extract text from uploaded PDF/DOCX project reports.
+pypdf==4.2.0
+python-docx>=1.1.0
+mammoth>=1.6.0
+
+# Requests handles HTTP calls for downloading uploaded report files.
+requests==2.31.0
+
+
+# =============================================================================
+# The following were used by an earlier version of this project (a single
+# Transformer model trained on overlapping windows with 36 features) that
+# has since been replaced by the current two-model GRU + Random Forest
+# system (78 transcript_only features, non-overlapping windows). They are
+# not imported anywhere in the current live pipeline (app.py, inference.py,
+# feature_extractor.py, audio_features.py, visual_features.py,
+# linguistic_features.py) and can likely be removed. Verify with
+# `pip show <package>` / a project-wide import search before deleting, in
+# case any offline training or evaluation script still depends on them.
+# =============================================================================
+# sentence-transformers>=2.2.0   # semantic-similarity correctness scoring, replaced by regex/keyword matching in linguistic_features.py
+# scipy==1.12.0                  # statistical functions for the old feature-selection step
+# matplotlib>=3.7.0              # training/evaluation plots, not used at inference time

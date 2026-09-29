@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+*.egg-info/
+
+# Firebase credentials, never commit this
+serviceAccountKey.json
+
+# Models (too large for git) - matches the actual files inference.py loads:
+# transcript_baseline.joblib, transcript_temporal.pt,
+# transcript_temporal_preprocessing.joblib
+models/*.joblib
+models/*.pt
+
+# Exam recordings (too large for git, and contain student video data)
+data/exam_videos/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PyCharm
+.idea/
+*.iml
+
+# VS Code
+.vscode/
